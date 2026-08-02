@@ -27,6 +27,7 @@ screenshots/
 # ── CREDENTIALS ──────────────────────────────────────────────────────────────
 .env
 .env.*
+*.env
 !.env.example
 *.pem
 *.key
