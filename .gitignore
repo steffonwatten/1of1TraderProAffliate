@@ -1,0 +1,79 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# This file is committed FIRST, before any source arrives. That is deliberate.
+#
+# On a prior engagement customer records reached a repository and needed a git
+# history rewrite to remove. The window in which that happens is between
+# `git init` and these rules landing — so it is closed first.
+#
+# Verify, do not assume:   git check-ignore -v <path>
+# Re-verify after ANY bulk file copy — a .gitignore can be silently overwritten
+# and `git status` will not tell you.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── CUSTOMER DATA — never, under any circumstances ───────────────────────────
+exports/
+attached_assets/
+reports/
+uploads/
+screenshots/
+.canvas/
+*.csv
+*.xlsx
+*.xls
+*.sql
+*.dump
+*.vcf
+
+# ── CREDENTIALS ──────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*credentials*
+*service-account*
+
+# ── RAW SESSION TRANSCRIPTS ──────────────────────────────────────────────────
+# These contain secrets in plain text, plus server addresses and findings about
+# customer records. A redacted docs/SESSION-CHAT.md is the safe derivative.
+*.jsonl
+session-transcript*
+
+# ── IMAGES ───────────────────────────────────────────────────────────────────
+# Screenshots have contained customer names, account balances and identity
+# documents. Blanket-blocked; add a narrow exception if a repo genuinely needs
+# one, and say why in the commit.
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.pdf
+
+# ── BUILD OUTPUT ─────────────────────────────────────────────────────────────
+dist/
+build/
+out/
+.next/
+coverage/
+*.tsbuildinfo
+
+# ── DEPENDENCIES ─────────────────────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+.venv/
+__pycache__/
+
+# ── EDITOR / OS ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# ── LOCAL AI SESSION STATE ───────────────────────────────────────────────────
+# .claude/rules/ and .claude/launch.json ARE committed — they must travel with
+# the repo, because a cloud session clones only this repository.
+.claude/settings.local.json
