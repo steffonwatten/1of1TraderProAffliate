@@ -1,0 +1,49 @@
+// Preview servers.
+//
+// Open the browser pane and the AI starts these, then verifies its own changes
+// against the RUNNING APP rather than against a green typecheck. That is the
+// difference between "it compiles" and "it works".
+//
+// COMMITTED DELIBERATELY, so it works for everyone on first connect. The point
+// of the engagement is that the client builds here instead of paying a metered
+// agent — and that fails on friction, not on features. If the app does not start
+// on the first attempt, they go back to the platform and the bill returns.
+//
+// 🔴 THE ORDER MATTERS. The frontend proxies /api to the backend, so the backend
+//    starts first. Check the frontend can actually REACH the API in dev: in
+//    production these apps usually serve the API and the built frontend from one
+//    origin, so the generated client uses relative paths and sets no base URL.
+//    Run the frontend on its own port without a proxy entry in the bundler
+//    config and EVERY API call 404s.
+//
+// 🔴 NEVER PUT SECRETS HERE — this file is committed. Real values live in .env,
+//    which is gitignored. See .env.example and GENERAL-secrets.md.
+//
+// 🔴 WORKERS_ENABLED=false. This is not the host. See .env.example, item 1.
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "TODO-api-package", "dev"],
+      "port": 5000,
+      "env": {
+        "NODE_ENV": "development",
+        "PORT": "5000",
+        "WORKERS_ENABLED": "false",
+        "AUTH_DEV_BYPASS": "1"
+      }
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "TODO-frontend-package", "dev"],
+      "port": 5173,
+      "env": {
+        "PORT": "5173",
+        "API_PROXY_TARGET": "http://127.0.0.1:5000"
+      }
+    }
+  ]
+}
