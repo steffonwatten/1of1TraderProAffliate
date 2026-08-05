@@ -1,0 +1,3 @@
+- [API contract workflow](api-contract-workflow.md) — openapi is source of truth; rm tsbuildinfo + root `tsc --build` before typecheck; per-endpoint response schemas.
+- [Deploy builds from git tree](deploy-builds-from-git-tree.md) — vite load-fallback ENOENT on an existing file = it was uncommitted at publish time; commit + re-publish.
+- [Deploy builds committed tree](deploy-committed-tree.md) — publish build uses committed git tree; uncommitted files fail with vite load-fallback ENOENT.

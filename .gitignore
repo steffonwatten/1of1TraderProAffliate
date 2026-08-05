@@ -66,6 +66,16 @@ node_modules/
 .venv/
 __pycache__/
 
+# ── REPLIT WORKSPACE STATE ───────────────────────────────────────────────────
+# Carried over from the export's own .gitignore. `.local/` is the pnpm
+# content-addressable store — 190 MB of the 209 MB export. Never commit it.
+.cache/
+.local/
+tmp/
+out-tsc/
+.expo/
+.expo-shared/
+
 # ── EDITOR / OS ──────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db

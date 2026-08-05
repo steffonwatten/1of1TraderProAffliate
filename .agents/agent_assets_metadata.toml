@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "sZbn_ujCRrIiKas64Nyvw"
+uri = "file://artifacts/trader-bot/public/hero-bg.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "cIPqZ43oyavmgW1VUxzZn"
+uri = "file://artifacts/trader-bot/public/algo-graphic.png"
+type = "image"
+title = "Abstract gold algorithm glowing"
+
+[[generated]]
+id = "cicKf-PoWsxr6Jc26B2lg"
+uri = "file://attached_assets/generated_images/cinematic_dark_trading_floor_b7eb.png"
+type = "image"
+title = "generated_image"

@@ -1,0 +1,2649 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: 1OF1 Trader Pro Affiliate Back Office API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: public
+    description: Public endpoints
+  - name: auth
+    description: Authentication
+  - name: affiliate
+    description: Affiliate dashboard
+  - name: admin
+    description: Admin operations
+  - name: webhooks
+    description: Webhook handlers
+  - name: tracking
+    description: Click and session tracking
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # Auth
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # Public
+  /affiliate/apply:
+    post:
+      operationId: submitAffiliateApplication
+      tags: [public]
+      summary: Submit affiliate application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AffiliateApplicationRequest"
+      responses:
+        "201":
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /r/{referralCode}:
+    get:
+      operationId: handleReferralRedirect
+      tags: [public]
+      summary: Handle referral redirect
+      parameters:
+        - name: referralCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect to landing page
+
+  # Tracking
+  /track/click:
+    post:
+      operationId: trackClick
+      tags: [tracking]
+      summary: Track referral click
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrackClickRequest"
+      responses:
+        "200":
+          description: Tracked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackClickResponse"
+
+  /track/lead:
+    post:
+      operationId: trackLead
+      tags: [tracking]
+      summary: Track lead signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrackLeadRequest"
+      responses:
+        "200":
+          description: Tracked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # Webhooks
+  /webhooks/whop:
+    post:
+      operationId: handleWhopWebhook
+      tags: [webhooks]
+      summary: Handle Whop webhook event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Processed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # Admin - Applications
+  /admin/applications:
+    get:
+      operationId: getAdminApplications
+      tags: [admin]
+      summary: Get all applications
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, denied]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Applications list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationsListResponse"
+
+  /admin/applications/{id}:
+    get:
+      operationId: getAdminApplication
+      tags: [admin]
+      summary: Get application detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliateApplication"
+
+  /admin/applications/{id}/approve:
+    post:
+      operationId: approveApplication
+      tags: [admin]
+      summary: Approve application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationActionRequest"
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/applications/{id}/deny:
+    post:
+      operationId: denyApplication
+      tags: [admin]
+      summary: Deny application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationActionRequest"
+      responses:
+        "200":
+          description: Denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # Admin - Affiliates
+  /admin/affiliates:
+    get:
+      operationId: getAdminAffiliates
+      tags: [admin]
+      summary: Get all affiliates
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, paused, terminated]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Affiliates list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliatesListResponse"
+
+  /admin/affiliates/{id}:
+    get:
+      operationId: getAdminAffiliate
+      tags: [admin]
+      summary: Get affiliate detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Affiliate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliateDetail"
+
+  /admin/affiliates/{id}/commission:
+    patch:
+      operationId: updateAffiliateCommission
+      tags: [admin]
+      summary: Update affiliate commission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCommissionRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/affiliates/{id}/status:
+    patch:
+      operationId: updateAffiliateStatus
+      tags: [admin]
+      summary: Update affiliate status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAffiliateStatusRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/affiliates/{id}/commission-rules:
+    get:
+      operationId: getAffiliateCommissionRules
+      tags: [admin]
+      summary: Get affiliate commission rules
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Commission rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CommissionRule"
+    post:
+      operationId: createCommissionRule
+      tags: [admin]
+      summary: Create commission rule for affiliate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommissionRuleRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommissionRule"
+
+  /admin/commission-rules/{ruleId}:
+    patch:
+      operationId: updateCommissionRule
+      tags: [admin]
+      summary: Update commission rule
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommissionRuleRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommissionRule"
+    delete:
+      operationId: deleteCommissionRule
+      tags: [admin]
+      summary: Delete commission rule
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # Admin - Overview
+  /admin/overview:
+    get:
+      operationId: getAdminOverview
+      tags: [admin]
+      summary: Get admin dashboard overview stats
+      responses:
+        "200":
+          description: Overview stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOverview"
+
+  /admin/analytics:
+    get:
+      operationId: getAdminAnalytics
+      tags: [admin]
+      summary: Get admin analytics data
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: Analytics data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAnalytics"
+
+  # Admin - Payouts
+  /admin/payouts:
+    get:
+      operationId: getAdminPayouts
+      tags: [admin]
+      summary: Get all payouts
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, paid, cancelled]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Payouts list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminPayoutsListResponse"
+    post:
+      operationId: createPayout
+      tags: [admin]
+      summary: Create a payout batch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePayoutRequest"
+      responses:
+        "201":
+          description: Payout created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payout"
+
+  /admin/payouts/{id}/mark-paid:
+    post:
+      operationId: markPayoutPaid
+      tags: [admin]
+      summary: Mark payout as paid
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payoutReference:
+                  type: string
+      responses:
+        "200":
+          description: Marked paid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/payouts/export:
+    get:
+      operationId: exportPayouts
+      tags: [admin]
+      summary: Export payouts as CSV
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: affiliateId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  # Admin - Commissions
+  /admin/commissions:
+    get:
+      operationId: getAdminCommissions
+      tags: [admin]
+      summary: Get all commissions
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, paid, voided]
+        - name: affiliateId
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Commissions list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommissionsListResponse"
+
+  /admin/commissions/{id}:
+    patch:
+      operationId: adjustCommission
+      tags: [admin]
+      summary: Manually adjust a commission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdjustCommissionRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # Admin - Sales/Memberships
+  /admin/memberships:
+    get:
+      operationId: getAdminMemberships
+      tags: [admin]
+      summary: Get all memberships synced from Whop
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: affiliateId
+          in: query
+          schema:
+            type: integer
+        - name: country
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Memberships list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MembershipsListResponse"
+
+  # Admin - Audit Logs
+  /admin/audit-logs:
+    get:
+      operationId: getAuditLogs
+      tags: [admin]
+      summary: Get audit logs
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogsListResponse"
+
+  # Admin - Email Logs
+  /admin/email-logs:
+    get:
+      operationId: getEmailLogs
+      tags: [admin]
+      summary: Get email send logs
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+      responses:
+        "200":
+          description: Email logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailLogsListResponse"
+
+  # Admin - Whop Sync
+  /admin/sync/whop/memberships:
+    post:
+      operationId: syncWhopMemberships
+      tags: [admin]
+      summary: Manually trigger Whop membership sync
+      responses:
+        "200":
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncResult"
+
+  /admin/sync/whop/payments:
+    post:
+      operationId: syncWhopPayments
+      tags: [admin]
+      summary: Manually trigger Whop payments sync
+      responses:
+        "200":
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncResult"
+
+  # Admin - Users management
+  /admin/users:
+    get:
+      operationId: getAdminUsers
+      tags: [admin]
+      summary: Get all users
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [admin, affiliate]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersListResponse"
+    post:
+      operationId: createAdminUser
+      tags: [admin]
+      summary: Create admin user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # Affiliate Dashboard
+  /affiliate/dashboard:
+    get:
+      operationId: getAffiliateDashboard
+      tags: [affiliate]
+      summary: Get affiliate dashboard stats
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliateDashboard"
+
+  /affiliate/customers:
+    get:
+      operationId: getAffiliateCustomers
+      tags: [affiliate]
+      summary: Get affiliate's referred customers
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Customers list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliateCustomersListResponse"
+
+  /affiliate/commissions:
+    get:
+      operationId: getAffiliateCommissions
+      tags: [affiliate]
+      summary: Get affiliate's commissions
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Commissions list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliateCommissionsListResponse"
+
+  /affiliate/payouts:
+    get:
+      operationId: getAffiliatePayouts
+      tags: [affiliate]
+      summary: Get affiliate's payouts
+      responses:
+        "200":
+          description: Payouts list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayoutsListResponse"
+
+  /affiliate/analytics:
+    get:
+      operationId: getAffiliateAnalytics
+      tags: [affiliate]
+      summary: Get affiliate analytics
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: Analytics data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliateAnalytics"
+
+  /affiliate/links:
+    get:
+      operationId: getAffiliateLinks
+      tags: [affiliate]
+      summary: Get affiliate's referral links and UTM links
+      responses:
+        "200":
+          description: Links
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliateLinks"
+    post:
+      operationId: createCampaignLink
+      tags: [affiliate]
+      summary: Create campaign UTM link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCampaignLinkRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CampaignLink"
+
+  /affiliate/profile:
+    get:
+      operationId: getAffiliateProfile
+      tags: [affiliate]
+      summary: Get affiliate profile
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliateProfile"
+    patch:
+      operationId: updateAffiliateProfile
+      tags: [affiliate]
+      summary: Update affiliate profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAffiliateProfileRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+      required:
+        - user
+        - token
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        fullName:
+          type: string
+        role:
+          type: string
+          enum: [admin, affiliate]
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        affiliateId:
+          type: integer
+          nullable: true
+        affiliateCode:
+          type: string
+          nullable: true
+      required:
+        - id
+        - email
+        - fullName
+        - role
+        - status
+        - createdAt
+
+    CreateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        fullName:
+          type: string
+        role:
+          type: string
+          enum: [admin, affiliate]
+      required:
+        - email
+        - password
+        - fullName
+        - role
+
+    AffiliateApplicationRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        country:
+          type: string
+        telegram:
+          type: string
+          nullable: true
+        discord:
+          type: string
+          nullable: true
+        websiteUrl:
+          type: string
+          nullable: true
+        twitterUrl:
+          type: string
+          nullable: true
+        youtubeUrl:
+          type: string
+          nullable: true
+        audienceType:
+          type: string
+        communitySize:
+          type: string
+        trafficSources:
+          type: string
+        whyJoin:
+          type: string
+        tradingExperience:
+          type: string
+        payoutMethod:
+          type: string
+          nullable: true
+        payoutDetails:
+          type: string
+          nullable: true
+      required:
+        - fullName
+        - email
+        - phone
+        - country
+        - audienceType
+        - communitySize
+        - trafficSources
+        - whyJoin
+        - tradingExperience
+
+    AffiliateApplication:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        country:
+          type: string
+        telegram:
+          type: string
+          nullable: true
+        discord:
+          type: string
+          nullable: true
+        websiteUrl:
+          type: string
+          nullable: true
+        twitterUrl:
+          type: string
+          nullable: true
+        youtubeUrl:
+          type: string
+          nullable: true
+        audienceType:
+          type: string
+        communitySize:
+          type: string
+        trafficSources:
+          type: string
+        whyJoin:
+          type: string
+        tradingExperience:
+          type: string
+        payoutMethod:
+          type: string
+          nullable: true
+        payoutDetails:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [pending, approved, denied]
+        reviewedBy:
+          type: integer
+          nullable: true
+        reviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - fullName
+        - email
+        - phone
+        - country
+        - audienceType
+        - communitySize
+        - trafficSources
+        - whyJoin
+        - tradingExperience
+        - status
+        - createdAt
+
+    ApplicationActionRequest:
+      type: object
+      properties:
+        notes:
+          type: string
+          nullable: true
+
+    ApplicationsListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AffiliateApplication"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - data
+        - total
+        - page
+        - limit
+
+    Affiliate:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        affiliateCode:
+          type: string
+        referralSlug:
+          type: string
+        referralUrl:
+          type: string
+        defaultCommissionType:
+          type: string
+          enum: [flat, percent]
+        defaultCommissionValue:
+          type: number
+        payoutMethod:
+          type: string
+          nullable: true
+        payoutDetails:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, paused, terminated]
+        createdAt:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/User"
+        totalClicks:
+          type: integer
+        totalCustomers:
+          type: integer
+        totalRevenue:
+          type: number
+        unpaidCommission:
+          type: number
+      required:
+        - id
+        - userId
+        - affiliateCode
+        - referralSlug
+        - referralUrl
+        - defaultCommissionType
+        - defaultCommissionValue
+        - status
+        - createdAt
+        - user
+        - totalClicks
+        - totalCustomers
+        - totalRevenue
+        - unpaidCommission
+
+    AffiliateDetail:
+      allOf:
+        - $ref: "#/components/schemas/Affiliate"
+        - type: object
+          properties:
+            commissionRules:
+              type: array
+              items:
+                $ref: "#/components/schemas/CommissionRule"
+            recentPayments:
+              type: array
+              items:
+                $ref: "#/components/schemas/Payment"
+            clicksByCountry:
+              type: array
+              items:
+                $ref: "#/components/schemas/CountryStat"
+            conversionRate:
+              type: number
+
+    AffiliatesListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Affiliate"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - data
+        - total
+        - page
+        - limit
+
+    UpdateCommissionRequest:
+      type: object
+      properties:
+        defaultCommissionType:
+          type: string
+          enum: [flat, percent]
+        defaultCommissionValue:
+          type: number
+      required:
+        - defaultCommissionType
+        - defaultCommissionValue
+
+    UpdateAffiliateStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [active, paused, terminated]
+        reason:
+          type: string
+          nullable: true
+      required:
+        - status
+
+    CommissionRule:
+      type: object
+      properties:
+        id:
+          type: integer
+        affiliateId:
+          type: integer
+        productId:
+          type: string
+          nullable: true
+        planId:
+          type: string
+          nullable: true
+        commissionType:
+          type: string
+          enum: [flat, percent]
+        commissionValue:
+          type: number
+        appliesTo:
+          type: string
+          enum: [initial_sale, renewal, lifetime]
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - affiliateId
+        - commissionType
+        - commissionValue
+        - appliesTo
+        - active
+        - createdAt
+
+    CreateCommissionRuleRequest:
+      type: object
+      properties:
+        productId:
+          type: string
+          nullable: true
+        planId:
+          type: string
+          nullable: true
+        commissionType:
+          type: string
+          enum: [flat, percent]
+        commissionValue:
+          type: number
+        appliesTo:
+          type: string
+          enum: [initial_sale, renewal, lifetime]
+        active:
+          type: boolean
+      required:
+        - commissionType
+        - commissionValue
+        - appliesTo
+
+    AdminOverview:
+      type: object
+      properties:
+        totalAffiliates:
+          type: integer
+        activeAffiliates:
+          type: integer
+        pendingApplications:
+          type: integer
+        totalClicks:
+          type: integer
+        totalSignups:
+          type: integer
+        totalPaidCustomers:
+          type: integer
+        totalAttributedRevenue:
+          type: number
+        totalCommissionsOwed:
+          type: number
+        totalCommissionsPaid:
+          type: number
+        topAffiliates:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopAffiliate"
+        clicksByCountry:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountryStat"
+        clicksBySource:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceStat"
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityItem"
+      required:
+        - totalAffiliates
+        - activeAffiliates
+        - pendingApplications
+        - totalClicks
+        - totalSignups
+        - totalPaidCustomers
+        - totalAttributedRevenue
+        - totalCommissionsOwed
+        - totalCommissionsPaid
+        - topAffiliates
+        - clicksByCountry
+        - clicksBySource
+        - recentActivity
+
+    AdminAnalytics:
+      type: object
+      properties:
+        totalClicks:
+          type: integer
+        uniqueVisitors:
+          type: integer
+        totalSignups:
+          type: integer
+        conversionRate:
+          type: number
+        totalRevenue:
+          type: number
+        clicksByDay:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              clicks:
+                type: integer
+            required:
+              - date
+              - clicks
+        salesByDay:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              revenue:
+                type: number
+              sales:
+                type: integer
+            required:
+              - date
+              - revenue
+              - sales
+        clicksByCountry:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountryStat"
+        clicksBySource:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceStat"
+      required:
+        - totalClicks
+        - uniqueVisitors
+        - totalSignups
+        - conversionRate
+        - totalRevenue
+        - clicksByDay
+        - salesByDay
+        - clicksByCountry
+        - clicksBySource
+
+    TopAffiliate:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        affiliateCode:
+          type: string
+        totalRevenue:
+          type: number
+        totalCustomers:
+          type: integer
+        unpaidCommission:
+          type: number
+      required:
+        - id
+        - fullName
+        - affiliateCode
+        - totalRevenue
+        - totalCustomers
+        - unpaidCommission
+
+    CountryStat:
+      type: object
+      properties:
+        country:
+          type: string
+        count:
+          type: integer
+        percentage:
+          type: number
+      required:
+        - country
+        - count
+        - percentage
+
+    SourceStat:
+      type: object
+      properties:
+        source:
+          type: string
+        count:
+          type: integer
+        percentage:
+          type: number
+      required:
+        - source
+        - count
+        - percentage
+
+    TimeSeriesStat:
+      type: object
+      properties:
+        date:
+          type: string
+        value:
+          type: number
+      required:
+        - date
+        - value
+
+    ActivityItem:
+      type: object
+      properties:
+        type:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - type
+        - description
+        - createdAt
+
+    Payout:
+      type: object
+      properties:
+        id:
+          type: integer
+        affiliateId:
+          type: integer
+        affiliateName:
+          type: string
+          nullable: true
+        affiliateCode:
+          type: string
+          nullable: true
+        totalAmount:
+          type: number
+        currency:
+          type: string
+        payoutMethod:
+          type: string
+          nullable: true
+        payoutReference:
+          type: string
+          nullable: true
+        periodStart:
+          type: string
+          format: date-time
+          nullable: true
+        periodEnd:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum: [pending, paid, cancelled]
+        createdAt:
+          type: string
+          format: date-time
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - affiliateId
+        - totalAmount
+        - currency
+        - status
+        - createdAt
+
+    AffiliatePayoutRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        amount:
+          type: number
+        paymentMethod:
+          type: string
+          nullable: true
+        status:
+          type: string
+        transactionId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - amount
+        - paymentMethod
+        - status
+        - transactionId
+        - createdAt
+
+    PayoutsListResponse:
+      type: object
+      properties:
+        availableBalance:
+          type: number
+        pendingAmount:
+          type: number
+        totalPaid:
+          type: number
+        payouts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AffiliatePayoutRow"
+      required:
+        - availableBalance
+        - pendingAmount
+        - totalPaid
+        - payouts
+
+    AdminPayoutRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        affiliateId:
+          type: integer
+        totalAmount:
+          type: number
+        currency:
+          type: string
+        payoutMethod:
+          type: string
+          nullable: true
+        payoutReference:
+          type: string
+          nullable: true
+        periodStart:
+          type: string
+          format: date-time
+          nullable: true
+        periodEnd:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+        affiliateName:
+          type: string
+          nullable: true
+        affiliateCode:
+          type: string
+          nullable: true
+      required:
+        - id
+        - affiliateId
+        - totalAmount
+        - currency
+        - payoutMethod
+        - payoutReference
+        - status
+        - createdAt
+        - paidAt
+        - affiliateName
+        - affiliateCode
+
+    AdminPayoutsListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminPayoutRow"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPending:
+          type: number
+        totalPaid:
+          type: number
+      required:
+        - data
+        - total
+        - page
+        - limit
+        - totalPending
+        - totalPaid
+
+    CreatePayoutRequest:
+      type: object
+      properties:
+        affiliateId:
+          type: integer
+        commissionIds:
+          type: array
+          items:
+            type: integer
+        payoutMethod:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+      required:
+        - affiliateId
+        - commissionIds
+
+    Commission:
+      type: object
+      properties:
+        id:
+          type: integer
+        affiliateId:
+          type: integer
+        affiliateName:
+          type: string
+          nullable: true
+        paymentId:
+          type: integer
+          nullable: true
+        customerId:
+          type: integer
+          nullable: true
+        customerEmail:
+          type: string
+          nullable: true
+        commissionType:
+          type: string
+          enum: [flat, percent]
+        commissionValue:
+          type: number
+        commissionAmount:
+          type: number
+        commissionStatus:
+          type: string
+          enum: [pending, approved, paid, voided]
+        reason:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - affiliateId
+        - commissionType
+        - commissionValue
+        - commissionAmount
+        - commissionStatus
+        - createdAt
+
+    CommissionsListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Commission"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPending:
+          type: number
+        totalApproved:
+          type: number
+      required:
+        - data
+        - total
+        - page
+        - limit
+        - totalPending
+        - totalApproved
+
+    AdjustCommissionRequest:
+      type: object
+      properties:
+        commissionAmount:
+          type: number
+          nullable: true
+        commissionStatus:
+          type: string
+          enum: [pending, approved, paid, voided]
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        whopPaymentId:
+          type: string
+          nullable: true
+        whopMembershipId:
+          type: string
+          nullable: true
+        customerId:
+          type: integer
+          nullable: true
+        customerEmail:
+          type: string
+          nullable: true
+        affiliateId:
+          type: integer
+          nullable: true
+        grossAmount:
+          type: number
+        netAmount:
+          type: number
+        currency:
+          type: string
+        paymentType:
+          type: string
+          enum: [initial, renewal]
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+      required:
+        - id
+        - grossAmount
+        - netAmount
+        - currency
+        - paymentType
+        - status
+
+    Membership:
+      type: object
+      properties:
+        id:
+          type: integer
+        whopMembershipId:
+          type: string
+        whopUserId:
+          type: string
+          nullable: true
+        whopProductId:
+          type: string
+          nullable: true
+        whopPlanId:
+          type: string
+          nullable: true
+        customerEmail:
+          type: string
+          nullable: true
+        customerName:
+          type: string
+          nullable: true
+        customerCountry:
+          type: string
+          nullable: true
+        affiliateId:
+          type: integer
+          nullable: true
+        affiliateName:
+          type: string
+          nullable: true
+        status:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+          nullable: true
+        renewalDate:
+          type: string
+          format: date-time
+          nullable: true
+        canceledAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - whopMembershipId
+        - status
+        - createdAt
+
+    MembershipsListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Membership"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - data
+        - total
+        - page
+        - limit
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        adminUserId:
+          type: integer
+        adminEmail:
+          type: string
+          nullable: true
+        action:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: string
+          nullable: true
+        oldValue:
+          type: string
+          nullable: true
+        newValue:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - adminUserId
+        - action
+        - targetType
+        - createdAt
+
+    AuditLogsListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - data
+        - total
+        - page
+        - limit
+
+    EmailLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        recipient:
+          type: string
+        subject:
+          type: string
+        emailType:
+          type: string
+        status:
+          type: string
+        errorMessage:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - recipient
+        - subject
+        - emailType
+        - status
+        - createdAt
+
+    EmailLogsListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/EmailLog"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - data
+        - total
+        - page
+        - limit
+
+    UsersListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - data
+        - total
+        - page
+        - limit
+
+    TrackClickRequest:
+      type: object
+      properties:
+        affiliateCode:
+          type: string
+        ipAddress:
+          type: string
+          nullable: true
+        userAgent:
+          type: string
+          nullable: true
+        referrerUrl:
+          type: string
+          nullable: true
+        landingPage:
+          type: string
+          nullable: true
+        utmSource:
+          type: string
+          nullable: true
+        utmMedium:
+          type: string
+          nullable: true
+        utmCampaign:
+          type: string
+          nullable: true
+        sessionId:
+          type: string
+          nullable: true
+      required:
+        - affiliateCode
+
+    TrackClickResponse:
+      type: object
+      properties:
+        clickId:
+          type: integer
+        sessionId:
+          type: string
+        affiliateCode:
+          type: string
+      required:
+        - clickId
+        - sessionId
+        - affiliateCode
+
+    TrackLeadRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+          nullable: true
+      required:
+        - sessionId
+        - email
+
+    AffiliateDashboard:
+      type: object
+      properties:
+        totalClicks:
+          type: integer
+        uniqueClicks:
+          type: integer
+        totalSignups:
+          type: integer
+        paidCustomers:
+          type: integer
+        activeCustomers:
+          type: integer
+        canceledCustomers:
+          type: integer
+        conversionRate:
+          type: number
+        revenueGenerated:
+          type: number
+        unpaidCommissions:
+          type: number
+        paidCommissions:
+          type: number
+        referralLink:
+          type: string
+        affiliateCode:
+          type: string
+        commissionRate:
+          type: number
+        paymentMethod:
+          type: string
+          nullable: true
+        clicksByDay:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesStat"
+        clicksOverTime:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesStat"
+        salesOverTime:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesStat"
+        topCountries:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountryStat"
+      required:
+        - totalClicks
+        - uniqueClicks
+        - totalSignups
+        - paidCustomers
+        - activeCustomers
+        - canceledCustomers
+        - conversionRate
+        - revenueGenerated
+        - unpaidCommissions
+        - paidCommissions
+        - referralLink
+        - affiliateCode
+        - commissionRate
+        - clicksByDay
+        - clicksOverTime
+        - salesOverTime
+        - topCountries
+
+    AffiliateCustomer:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        membershipStatus:
+          type: string
+        planId:
+          type: string
+          nullable: true
+        totalRevenue:
+          type: number
+        yourEarnings:
+          type: number
+        joinedAt:
+          type: string
+          format: date-time
+          nullable: true
+        renewalDate:
+          type: string
+          format: date-time
+          nullable: true
+        canceledAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - email
+        - name
+        - country
+        - membershipStatus
+        - planId
+        - totalRevenue
+        - yourEarnings
+        - joinedAt
+        - renewalDate
+        - canceledAt
+
+    AffiliateCustomersListResponse:
+      type: object
+      properties:
+        customers:
+          type: array
+          items:
+            $ref: "#/components/schemas/AffiliateCustomer"
+        totalCustomers:
+          type: integer
+        activeMembers:
+          type: integer
+        retentionRate:
+          type: number
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - customers
+        - totalCustomers
+        - activeMembers
+        - retentionRate
+        - total
+        - page
+        - limit
+
+    AffiliateCommission:
+      type: object
+      properties:
+        id:
+          type: integer
+        customerEmail:
+          type: string
+          nullable: true
+        commissionAmount:
+          type: number
+        commissionStatus:
+          type: string
+          enum: [pending, approved, paid, voided]
+        paymentType:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - commissionAmount
+        - commissionStatus
+        - createdAt
+
+    AffiliateCommissionRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        customerEmail:
+          type: string
+          nullable: true
+        customerName:
+          type: string
+          nullable: true
+        saleAmount:
+          type: number
+          nullable: true
+        amount:
+          type: number
+        commissionType:
+          type: string
+        status:
+          type: string
+        rateType:
+          type: string
+        rateValue:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - customerEmail
+        - customerName
+        - saleAmount
+        - amount
+        - commissionType
+        - status
+        - rateType
+        - rateValue
+        - createdAt
+        - paidAt
+
+    AffiliateCommissionsListResponse:
+      type: object
+      properties:
+        commissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/AffiliateCommissionRow"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalEarned:
+          type: number
+        totalPending:
+          type: number
+        totalPaid:
+          type: number
+      required:
+        - commissions
+        - total
+        - page
+        - limit
+        - totalEarned
+        - totalPending
+        - totalPaid
+
+    AffiliateAnalytics:
+      type: object
+      properties:
+        totalClicks:
+          type: integer
+        uniqueVisitors:
+          type: integer
+        totalSignups:
+          type: integer
+        conversionRate:
+          type: number
+        clicksByDay:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesStat"
+        salesOverTime:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesStat"
+        clicksByCountry:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountryStat"
+        clicksBySource:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceStat"
+        topLandingPages:
+          type: array
+          items:
+            type: object
+            properties:
+              page:
+                type: string
+              count:
+                type: integer
+            required:
+              - page
+              - count
+      required:
+        - totalClicks
+        - uniqueVisitors
+        - totalSignups
+        - conversionRate
+        - clicksByDay
+        - salesOverTime
+        - clicksByCountry
+        - clicksBySource
+        - topLandingPages
+
+    AffiliateLinks:
+      type: object
+      properties:
+        primaryLink:
+          type: string
+        affiliateCode:
+          type: string
+        campaignLinks:
+          type: array
+          items:
+            $ref: "#/components/schemas/CampaignLink"
+      required:
+        - primaryLink
+        - affiliateCode
+        - campaignLinks
+
+    CampaignLink:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        url:
+          type: string
+        utmSource:
+          type: string
+          nullable: true
+        utmMedium:
+          type: string
+          nullable: true
+        utmCampaign:
+          type: string
+          nullable: true
+        clicks:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - url
+        - clicks
+        - createdAt
+
+    CreateCampaignLinkRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        utmSource:
+          type: string
+          nullable: true
+        utmMedium:
+          type: string
+          nullable: true
+        utmCampaign:
+          type: string
+          nullable: true
+        landingPage:
+          type: string
+          nullable: true
+      required:
+        - name
+
+    AffiliateProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        fullName:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        telegram:
+          type: string
+          nullable: true
+        discord:
+          type: string
+          nullable: true
+        payoutMethod:
+          type: string
+          nullable: true
+        payoutDetails:
+          type: string
+          nullable: true
+        websiteUrl:
+          type: string
+          nullable: true
+        twitterUrl:
+          type: string
+          nullable: true
+        youtubeUrl:
+          type: string
+          nullable: true
+        commissionRate:
+          type: number
+        affiliateCode:
+          type: string
+        referralUrl:
+          type: string
+      required:
+        - id
+        - email
+        - fullName
+        - commissionRate
+        - affiliateCode
+        - referralUrl
+
+    UpdateAffiliateProfileRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        telegram:
+          type: string
+          nullable: true
+        discord:
+          type: string
+          nullable: true
+        payoutMethod:
+          type: string
+          nullable: true
+        payoutDetails:
+          type: string
+          nullable: true
+
+    SyncResult:
+      type: object
+      properties:
+        synced:
+          type: integer
+        created:
+          type: integer
+        updated:
+          type: integer
+        errors:
+          type: integer
+        message:
+          type: string
+      required:
+        - synced
+        - created
+        - updated
+        - errors
+        - message
