@@ -52,6 +52,21 @@ session-transcript*
 *.webp
 *.pdf
 
+# ── SOURCE IMAGE ASSETS — narrow exceptions to the blanket block above ──────
+# The blanket image block exists because screenshots have carried customer names,
+# balances and identity documents. These directories are different: they are the
+# application's own brand and product artwork, imported by the source and already
+# served publicly on the live site. Every file was opened and checked before this
+# exception was added.
+#
+# Blocking them broke the build — Vite failed with 'Failed to resolve import' and
+# the preview would not render at all.
+#
+# Keep these narrow. Never negate a whole tree, and never add one without looking
+# at the files first. Build output under dist/ stays excluded.
+
+!artifacts/affiliate-dashboard/public/**
+
 # ── BUILD OUTPUT ─────────────────────────────────────────────────────────────
 dist/
 build/
