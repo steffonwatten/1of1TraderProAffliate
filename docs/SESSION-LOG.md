@@ -72,6 +72,41 @@ MT5 trading accounts, broker admin with approval queues; MT5 through a mock
 adapter until the real Manager API is supplied; wire + crypto-deposit-only
 rails; Resend email).
 
+### 1.4 — M5: KYC backend (upload + admin review)
+
+**Problem.** Clients must upload identity documents and be blocked from
+opening MT5 accounts until the broker approves them; the broker needs a
+review queue with the documents viewable. Identity files must never enter the
+repo or be publicly reachable.
+
+**Change.** `lib/fileStorage.ts` — local-disk store behind a 3-function
+interface, dir from `KYC_UPLOAD_DIR` (default `.data/kyc-uploads`, now
+gitignored), UUID filenames, mode 600, path-traversal-safe reads.
+`routes/clientKyc.ts` — GET /client/kyc, POST /client/kyc/documents (multer
+memory storage, 10 MB, JPEG/PNG/WebP/PDF only); an upload flips overall
+kycStatus none/rejected → pending (approved is not reset). 
+`routes/adminBrokerKyc.ts` — client list w/ kycStatus+search filters, client
+detail w/ docs + wallet balance + account count, kyc-decision
+(approve/reject + notes → mirrors onto pending docs, writes
+admin_audit_logs, best-effort decision email), authenticated file streaming.
+Spec + codegen (one more zod ambiguity re-export; api-zod tsconfig gains
+`lib: ["dom", ...]` matching api-client-react, needed for the generated
+multipart Blob type).
+
+**Expected result.** Upload → pending → admin review → approve/reject loop
+works; files live outside the repo, served only through requireAdmin.
+
+**Verified by.** MEASURED via curl: PNG upload 201 and lands in
+KYC_UPLOAD_DIR as UUID.png; .exe rejected 400; kycStatus flips to pending;
+admin pending-filter lists the client; document streams 200 image/png with
+auth and 401 without; approve → client sees approved + notes;
+admin_audit_logs row `kyc_approved/broker_client/1`. Local scratch DB was
+recreated with the full schema (drizzle push against the LOCAL dev DB only —
+the deployed-DB prohibition stands) and `apply-broker-schema` re-verified
+idempotent against it.
+
+---
+
 ### 1.3 — M3: trading-client auth backend
 
 **Problem.** Trading clients need signup with email-code verification and

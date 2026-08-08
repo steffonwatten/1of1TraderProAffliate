@@ -1221,3 +1221,109 @@ export const GetClientMeResponse = zod.object({
   kycStatus: zod.enum(["none", "pending", "approved", "rejected"]),
   createdAt: zod.date(),
 });
+
+/**
+ * @summary Get the client's KYC status and uploaded documents
+ */
+export const GetClientKycResponse = zod.object({
+  kycStatus: zod.enum(["none", "pending", "approved", "rejected"]),
+  kycNotes: zod.string().nullish(),
+  documents: zod.array(
+    zod.object({
+      id: zod.number(),
+      docType: zod.enum(["id_front", "id_back", "proof_of_address"]),
+      originalName: zod.string(),
+      status: zod.enum(["pending", "approved", "rejected"]),
+      reviewNotes: zod.string().nullish(),
+      createdAt: zod.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Upload a KYC document (multipart)
+ */
+export const UploadClientKycDocumentBody = zod.object({
+  docType: zod.enum(["id_front", "id_back", "proof_of_address"]),
+  file: zod.instanceof(File),
+});
+
+/**
+ * @summary List trading clients
+ */
+export const ListBrokerClientsQueryParams = zod.object({
+  kycStatus: zod.enum(["none", "pending", "approved", "rejected"]).optional(),
+  search: zod.coerce.string().optional(),
+});
+
+export const ListBrokerClientsResponse = zod.object({
+  clients: zod.array(
+    zod.object({
+      id: zod.number(),
+      email: zod.string(),
+      fullName: zod.string(),
+      country: zod.string().nullish(),
+      status: zod.enum(["pending_email", "active", "suspended"]),
+      kycStatus: zod.enum(["none", "pending", "approved", "rejected"]),
+      walletBalance: zod.string().nullish(),
+      createdAt: zod.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Get one trading client with KYC docs, wallet and accounts
+ */
+export const GetBrokerClientDetailParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetBrokerClientDetailResponse = zod.object({
+  client: zod.object({
+    id: zod.number(),
+    email: zod.string(),
+    fullName: zod.string(),
+    country: zod.string().nullish(),
+    status: zod.enum(["pending_email", "active", "suspended"]),
+    kycStatus: zod.enum(["none", "pending", "approved", "rejected"]),
+    walletBalance: zod.string().nullish(),
+    createdAt: zod.date(),
+  }),
+  phone: zod.string().nullish(),
+  kycNotes: zod.string().nullish(),
+  documents: zod.array(
+    zod.object({
+      id: zod.number(),
+      docType: zod.enum(["id_front", "id_back", "proof_of_address"]),
+      originalName: zod.string(),
+      status: zod.enum(["pending", "approved", "rejected"]),
+      reviewNotes: zod.string().nullish(),
+      createdAt: zod.date(),
+    }),
+  ),
+  tradingAccountCount: zod.number(),
+});
+
+/**
+ * @summary Approve or reject a client's KYC
+ */
+export const DecideBrokerClientKycParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DecideBrokerClientKycBody = zod.object({
+  decision: zod.enum(["approved", "rejected"]),
+  notes: zod.string().nullish(),
+});
+
+export const DecideBrokerClientKycResponse = zod.object({
+  success: zod.boolean(),
+  kycStatus: zod.enum(["none", "pending", "approved", "rejected"]),
+});
+
+/**
+ * @summary Stream a KYC document file
+ */
+export const GetBrokerKycDocumentFileParams = zod.object({
+  id: zod.coerce.number(),
+});

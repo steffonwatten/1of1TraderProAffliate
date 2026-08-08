@@ -35,9 +35,15 @@ import type {
   ApplicationsListResponse,
   AuditLogsListResponse,
   AuthResponse,
+  BrokerClientDetailResponse,
+  BrokerClientListResponse,
+  BrokerKycDecisionRequest,
+  BrokerKycDecisionResponse,
   CampaignLink,
   ClientAuthResponse,
   ClientCodeSentResponse,
+  ClientKycStatusResponse,
+  ClientKycUploadResponse,
   ClientLoginRequest,
   ClientLogoutResponse,
   ClientProfile,
@@ -70,6 +76,7 @@ import type {
   GetEmailLogsParams,
   HandleWhopWebhookBody,
   HealthStatus,
+  ListBrokerClientsParams,
   LoginRequest,
   MarkPayoutPaidBody,
   MembershipsListResponse,
@@ -83,6 +90,7 @@ import type {
   UpdateAffiliateProfileRequest,
   UpdateAffiliateStatusRequest,
   UpdateCommissionRequest,
+  UploadClientKycDocumentBody,
   User,
   UsersListResponse,
 } from "./api.schemas";
@@ -4650,6 +4658,542 @@ export function useGetClientMe<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetClientMeQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get the client's KYC status and uploaded documents
+ */
+export const getGetClientKycUrl = () => {
+  return `/api/client/kyc`;
+};
+
+export const getClientKyc = async (
+  options?: RequestInit,
+): Promise<ClientKycStatusResponse> => {
+  return customFetch<ClientKycStatusResponse>(getGetClientKycUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetClientKycQueryKey = () => {
+  return [`/api/client/kyc`] as const;
+};
+
+export const getGetClientKycQueryOptions = <
+  TData = Awaited<ReturnType<typeof getClientKyc>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getClientKyc>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetClientKycQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getClientKyc>>> = ({
+    signal,
+  }) => getClientKyc({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getClientKyc>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetClientKycQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getClientKyc>>
+>;
+export type GetClientKycQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get the client's KYC status and uploaded documents
+ */
+
+export function useGetClientKyc<
+  TData = Awaited<ReturnType<typeof getClientKyc>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getClientKyc>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetClientKycQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Upload a KYC document (multipart)
+ */
+export const getUploadClientKycDocumentUrl = () => {
+  return `/api/client/kyc/documents`;
+};
+
+export const uploadClientKycDocument = async (
+  uploadClientKycDocumentBody: UploadClientKycDocumentBody,
+  options?: RequestInit,
+): Promise<ClientKycUploadResponse> => {
+  const formData = new FormData();
+  formData.append(`docType`, uploadClientKycDocumentBody.docType);
+  formData.append(`file`, uploadClientKycDocumentBody.file);
+
+  return customFetch<ClientKycUploadResponse>(getUploadClientKycDocumentUrl(), {
+    ...options,
+    method: "POST",
+    body: formData,
+  });
+};
+
+export const getUploadClientKycDocumentMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadClientKycDocument>>,
+    TError,
+    { data: BodyType<UploadClientKycDocumentBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof uploadClientKycDocument>>,
+  TError,
+  { data: BodyType<UploadClientKycDocumentBody> },
+  TContext
+> => {
+  const mutationKey = ["uploadClientKycDocument"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof uploadClientKycDocument>>,
+    { data: BodyType<UploadClientKycDocumentBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return uploadClientKycDocument(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UploadClientKycDocumentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof uploadClientKycDocument>>
+>;
+export type UploadClientKycDocumentMutationBody =
+  BodyType<UploadClientKycDocumentBody>;
+export type UploadClientKycDocumentMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Upload a KYC document (multipart)
+ */
+export const useUploadClientKycDocument = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadClientKycDocument>>,
+    TError,
+    { data: BodyType<UploadClientKycDocumentBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof uploadClientKycDocument>>,
+  TError,
+  { data: BodyType<UploadClientKycDocumentBody> },
+  TContext
+> => {
+  return useMutation(getUploadClientKycDocumentMutationOptions(options));
+};
+
+/**
+ * @summary List trading clients
+ */
+export const getListBrokerClientsUrl = (params?: ListBrokerClientsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/admin/broker/clients?${stringifiedParams}`
+    : `/api/admin/broker/clients`;
+};
+
+export const listBrokerClients = async (
+  params?: ListBrokerClientsParams,
+  options?: RequestInit,
+): Promise<BrokerClientListResponse> => {
+  return customFetch<BrokerClientListResponse>(
+    getListBrokerClientsUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListBrokerClientsQueryKey = (
+  params?: ListBrokerClientsParams,
+) => {
+  return [`/api/admin/broker/clients`, ...(params ? [params] : [])] as const;
+};
+
+export const getListBrokerClientsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listBrokerClients>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListBrokerClientsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listBrokerClients>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListBrokerClientsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listBrokerClients>>
+  > = ({ signal }) => listBrokerClients(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listBrokerClients>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListBrokerClientsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listBrokerClients>>
+>;
+export type ListBrokerClientsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List trading clients
+ */
+
+export function useListBrokerClients<
+  TData = Awaited<ReturnType<typeof listBrokerClients>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListBrokerClientsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listBrokerClients>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListBrokerClientsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get one trading client with KYC docs, wallet and accounts
+ */
+export const getGetBrokerClientDetailUrl = (id: number) => {
+  return `/api/admin/broker/clients/${id}`;
+};
+
+export const getBrokerClientDetail = async (
+  id: number,
+  options?: RequestInit,
+): Promise<BrokerClientDetailResponse> => {
+  return customFetch<BrokerClientDetailResponse>(
+    getGetBrokerClientDetailUrl(id),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetBrokerClientDetailQueryKey = (id: number) => {
+  return [`/api/admin/broker/clients/${id}`] as const;
+};
+
+export const getGetBrokerClientDetailQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBrokerClientDetail>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBrokerClientDetail>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetBrokerClientDetailQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getBrokerClientDetail>>
+  > = ({ signal }) => getBrokerClientDetail(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getBrokerClientDetail>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetBrokerClientDetailQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBrokerClientDetail>>
+>;
+export type GetBrokerClientDetailQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get one trading client with KYC docs, wallet and accounts
+ */
+
+export function useGetBrokerClientDetail<
+  TData = Awaited<ReturnType<typeof getBrokerClientDetail>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBrokerClientDetail>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetBrokerClientDetailQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Approve or reject a client's KYC
+ */
+export const getDecideBrokerClientKycUrl = (id: number) => {
+  return `/api/admin/broker/clients/${id}/kyc-decision`;
+};
+
+export const decideBrokerClientKyc = async (
+  id: number,
+  brokerKycDecisionRequest: BrokerKycDecisionRequest,
+  options?: RequestInit,
+): Promise<BrokerKycDecisionResponse> => {
+  return customFetch<BrokerKycDecisionResponse>(
+    getDecideBrokerClientKycUrl(id),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(brokerKycDecisionRequest),
+    },
+  );
+};
+
+export const getDecideBrokerClientKycMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof decideBrokerClientKyc>>,
+    TError,
+    { id: number; data: BodyType<BrokerKycDecisionRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof decideBrokerClientKyc>>,
+  TError,
+  { id: number; data: BodyType<BrokerKycDecisionRequest> },
+  TContext
+> => {
+  const mutationKey = ["decideBrokerClientKyc"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof decideBrokerClientKyc>>,
+    { id: number; data: BodyType<BrokerKycDecisionRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return decideBrokerClientKyc(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DecideBrokerClientKycMutationResult = NonNullable<
+  Awaited<ReturnType<typeof decideBrokerClientKyc>>
+>;
+export type DecideBrokerClientKycMutationBody =
+  BodyType<BrokerKycDecisionRequest>;
+export type DecideBrokerClientKycMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Approve or reject a client's KYC
+ */
+export const useDecideBrokerClientKyc = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof decideBrokerClientKyc>>,
+    TError,
+    { id: number; data: BodyType<BrokerKycDecisionRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof decideBrokerClientKyc>>,
+  TError,
+  { id: number; data: BodyType<BrokerKycDecisionRequest> },
+  TContext
+> => {
+  return useMutation(getDecideBrokerClientKycMutationOptions(options));
+};
+
+/**
+ * @summary Stream a KYC document file
+ */
+export const getGetBrokerKycDocumentFileUrl = (id: number) => {
+  return `/api/admin/broker/kyc/documents/${id}/file`;
+};
+
+export const getBrokerKycDocumentFile = async (
+  id: number,
+  options?: RequestInit,
+): Promise<Blob> => {
+  return customFetch<Blob>(getGetBrokerKycDocumentFileUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetBrokerKycDocumentFileQueryKey = (id: number) => {
+  return [`/api/admin/broker/kyc/documents/${id}/file`] as const;
+};
+
+export const getGetBrokerKycDocumentFileQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBrokerKycDocumentFile>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBrokerKycDocumentFile>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetBrokerKycDocumentFileQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getBrokerKycDocumentFile>>
+  > = ({ signal }) =>
+    getBrokerKycDocumentFile(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getBrokerKycDocumentFile>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetBrokerKycDocumentFileQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBrokerKycDocumentFile>>
+>;
+export type GetBrokerKycDocumentFileQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Stream a KYC document file
+ */
+
+export function useGetBrokerKycDocumentFile<
+  TData = Awaited<ReturnType<typeof getBrokerKycDocumentFile>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBrokerKycDocumentFile>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetBrokerKycDocumentFileQueryOptions(id, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

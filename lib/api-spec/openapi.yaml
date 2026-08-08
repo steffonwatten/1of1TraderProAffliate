@@ -1174,6 +1174,169 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  # Trading-client KYC
+  /client/kyc:
+    get:
+      operationId: getClientKyc
+      tags: [client]
+      summary: Get the client's KYC status and uploaded documents
+      responses:
+        "200":
+          description: KYC state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientKycStatusResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /client/kyc/documents:
+    post:
+      operationId: uploadClientKycDocument
+      tags: [client]
+      summary: Upload a KYC document (multipart)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                docType:
+                  type: string
+                  enum: [id_front, id_back, proof_of_address]
+                file:
+                  type: string
+                  format: binary
+              required:
+                - docType
+                - file
+      responses:
+        "201":
+          description: Uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientKycUploadResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # Broker admin — clients & KYC
+  /admin/broker/clients:
+    get:
+      operationId: listBrokerClients
+      tags: [broker-admin]
+      summary: List trading clients
+      parameters:
+        - name: kycStatus
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [none, pending, approved, rejected]
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Clients
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrokerClientListResponse"
+
+  /admin/broker/clients/{id}:
+    get:
+      operationId: getBrokerClientDetail
+      tags: [broker-admin]
+      summary: Get one trading client with KYC docs, wallet and accounts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Client detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrokerClientDetailResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/broker/clients/{id}/kyc-decision:
+    post:
+      operationId: decideBrokerClientKyc
+      tags: [broker-admin]
+      summary: Approve or reject a client's KYC
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BrokerKycDecisionRequest"
+      responses:
+        "200":
+          description: Decision applied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrokerKycDecisionResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/broker/kyc/documents/{id}/file:
+    get:
+      operationId: getBrokerKycDocumentFile
+      tags: [broker-admin]
+      summary: Stream a KYC document file
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: File stream
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     ClientRegisterRequest:
@@ -1308,6 +1471,148 @@ components:
         - status
         - kycStatus
         - createdAt
+
+    ClientKycDocument:
+      type: object
+      properties:
+        id:
+          type: integer
+        docType:
+          type: string
+          enum: [id_front, id_back, proof_of_address]
+        originalName:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        reviewNotes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - docType
+        - originalName
+        - status
+        - createdAt
+
+    ClientKycStatusResponse:
+      type: object
+      properties:
+        kycStatus:
+          type: string
+          enum: [none, pending, approved, rejected]
+        kycNotes:
+          type: string
+          nullable: true
+        documents:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientKycDocument"
+      required:
+        - kycStatus
+        - documents
+
+    ClientKycUploadResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        document:
+          $ref: "#/components/schemas/ClientKycDocument"
+      required:
+        - success
+        - document
+
+    BrokerClientSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        fullName:
+          type: string
+        country:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [pending_email, active, suspended]
+        kycStatus:
+          type: string
+          enum: [none, pending, approved, rejected]
+        walletBalance:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - fullName
+        - status
+        - kycStatus
+        - createdAt
+
+    BrokerClientListResponse:
+      type: object
+      properties:
+        clients:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrokerClientSummary"
+      required:
+        - clients
+
+    BrokerClientDetailResponse:
+      type: object
+      properties:
+        client:
+          $ref: "#/components/schemas/BrokerClientSummary"
+        phone:
+          type: string
+          nullable: true
+        kycNotes:
+          type: string
+          nullable: true
+        documents:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientKycDocument"
+        tradingAccountCount:
+          type: integer
+      required:
+        - client
+        - documents
+        - tradingAccountCount
+
+    BrokerKycDecisionRequest:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum: [approved, rejected]
+        notes:
+          type: string
+          nullable: true
+      required:
+        - decision
+
+    BrokerKycDecisionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        kycStatus:
+          type: string
+          enum: [none, pending, approved, rejected]
+      required:
+        - success
+        - kycStatus
 
     HealthStatus:
       type: object

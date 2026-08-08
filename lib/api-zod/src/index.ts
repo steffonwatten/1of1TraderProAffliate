@@ -11,4 +11,5 @@ export {
   MarkPayoutPaidBody,
   ClientVerifyEmailResponse,
   ClientLogoutResponse,
+  UploadClientKycDocumentBody,
 } from "./generated/api";

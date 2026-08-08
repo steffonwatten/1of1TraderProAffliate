@@ -80,6 +80,124 @@ export interface ClientLogoutResponse {
   success: boolean;
 }
 
+export type ClientKycDocumentDocType =
+  (typeof ClientKycDocumentDocType)[keyof typeof ClientKycDocumentDocType];
+
+export const ClientKycDocumentDocType = {
+  id_front: "id_front",
+  id_back: "id_back",
+  proof_of_address: "proof_of_address",
+} as const;
+
+export type ClientKycDocumentStatus =
+  (typeof ClientKycDocumentStatus)[keyof typeof ClientKycDocumentStatus];
+
+export const ClientKycDocumentStatus = {
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+} as const;
+
+export interface ClientKycDocument {
+  id: number;
+  docType: ClientKycDocumentDocType;
+  originalName: string;
+  status: ClientKycDocumentStatus;
+  reviewNotes?: string | null;
+  createdAt: string;
+}
+
+export type ClientKycStatusResponseKycStatus =
+  (typeof ClientKycStatusResponseKycStatus)[keyof typeof ClientKycStatusResponseKycStatus];
+
+export const ClientKycStatusResponseKycStatus = {
+  none: "none",
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+} as const;
+
+export interface ClientKycStatusResponse {
+  kycStatus: ClientKycStatusResponseKycStatus;
+  kycNotes?: string | null;
+  documents: ClientKycDocument[];
+}
+
+export interface ClientKycUploadResponse {
+  success: boolean;
+  document: ClientKycDocument;
+}
+
+export type BrokerClientSummaryStatus =
+  (typeof BrokerClientSummaryStatus)[keyof typeof BrokerClientSummaryStatus];
+
+export const BrokerClientSummaryStatus = {
+  pending_email: "pending_email",
+  active: "active",
+  suspended: "suspended",
+} as const;
+
+export type BrokerClientSummaryKycStatus =
+  (typeof BrokerClientSummaryKycStatus)[keyof typeof BrokerClientSummaryKycStatus];
+
+export const BrokerClientSummaryKycStatus = {
+  none: "none",
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+} as const;
+
+export interface BrokerClientSummary {
+  id: number;
+  email: string;
+  fullName: string;
+  country?: string | null;
+  status: BrokerClientSummaryStatus;
+  kycStatus: BrokerClientSummaryKycStatus;
+  walletBalance?: string | null;
+  createdAt: string;
+}
+
+export interface BrokerClientListResponse {
+  clients: BrokerClientSummary[];
+}
+
+export interface BrokerClientDetailResponse {
+  client: BrokerClientSummary;
+  phone?: string | null;
+  kycNotes?: string | null;
+  documents: ClientKycDocument[];
+  tradingAccountCount: number;
+}
+
+export type BrokerKycDecisionRequestDecision =
+  (typeof BrokerKycDecisionRequestDecision)[keyof typeof BrokerKycDecisionRequestDecision];
+
+export const BrokerKycDecisionRequestDecision = {
+  approved: "approved",
+  rejected: "rejected",
+} as const;
+
+export interface BrokerKycDecisionRequest {
+  decision: BrokerKycDecisionRequestDecision;
+  notes?: string | null;
+}
+
+export type BrokerKycDecisionResponseKycStatus =
+  (typeof BrokerKycDecisionResponseKycStatus)[keyof typeof BrokerKycDecisionResponseKycStatus];
+
+export const BrokerKycDecisionResponseKycStatus = {
+  none: "none",
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+} as const;
+
+export interface BrokerKycDecisionResponse {
+  success: boolean;
+  kycStatus: BrokerKycDecisionResponseKycStatus;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -947,3 +1065,32 @@ export type GetAffiliateCommissionsParams = {
 export type GetAffiliateAnalyticsParams = {
   days?: number;
 };
+
+export type UploadClientKycDocumentBodyDocType =
+  (typeof UploadClientKycDocumentBodyDocType)[keyof typeof UploadClientKycDocumentBodyDocType];
+
+export const UploadClientKycDocumentBodyDocType = {
+  id_front: "id_front",
+  id_back: "id_back",
+  proof_of_address: "proof_of_address",
+} as const;
+
+export type UploadClientKycDocumentBody = {
+  docType: UploadClientKycDocumentBodyDocType;
+  file: Blob;
+};
+
+export type ListBrokerClientsParams = {
+  kycStatus?: ListBrokerClientsKycStatus;
+  search?: string;
+};
+
+export type ListBrokerClientsKycStatus =
+  (typeof ListBrokerClientsKycStatus)[keyof typeof ListBrokerClientsKycStatus];
+
+export const ListBrokerClientsKycStatus = {
+  none: "none",
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+} as const;
