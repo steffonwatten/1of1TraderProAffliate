@@ -72,6 +72,39 @@ MT5 trading accounts, broker admin with approval queues; MT5 through a mock
 adapter until the real Manager API is supplied; wire + crypto-deposit-only
 rails; Resend email).
 
+### 1.3 — M3: trading-client auth backend
+
+**Problem.** Trading clients need signup with email-code verification and
+login, fully separate from affiliate auth (whose static-salt SHA-256 hashing
+must not be inherited).
+
+**Change.** `openapi.yaml` gains tags `client-auth`/`client`/`broker-admin`
+and the 7 client-auth endpoints; Orval codegen re-run (two zod name
+ambiguities resolved via the existing explicit re-export list in
+`lib/api-zod/src/index.ts`). New `lib/clientAuth.ts` (bcrypt cost 12, opaque
+64-hex session tokens in `broker_client_sessions`, `requireClient`
+middleware), `lib/emailBroker.ts` (broker emails that THROW on failure —
+Resend `result.error` inspected; decision emails best-effort), and
+`routes/clientAuth.ts` (register → hashed 6-digit code, 10-min expiry, 5
+attempts, 60s resend throttle → verify returns one-time set-password token,
+30-min TTL, cleared on use → set-password activates + auto-login; login;
+logout; /client/me). Wallet row created at verification
+(`onConflictDoNothing`). `email.ts` credentials became env-first
+(`RESEND_API_KEY`/`RESEND_FROM_EMAIL`) with the Replit connector as fallback,
+so the app runs outside Replit; in development a failed send logs the code so
+signup is testable.
+
+**Expected result.** Full signup → verify → password → login flow works; auth
+is bcrypt-based and isolated from affiliate auth.
+
+**Verified by.** MEASURED via curl against the built server + local Postgres:
+register 201; wrong code 400 (attempts increment); right code returns token;
+set-password returns session + activates; /client/me 200; login 200; wrong
+password 401; set-password token replay 400; `broker_wallets` row created
+with balance "0.00". Typecheck + build clean.
+
+---
+
 ### 1.2 — M2: MT5 adapter package (`@workspace/mt5`)
 
 **Problem.** Trading-account provisioning and balance operations must work now,

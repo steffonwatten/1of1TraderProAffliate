@@ -5,6 +5,81 @@
  * 1OF1 Trader Pro Affiliate Back Office API
  * OpenAPI spec version: 0.1.0
  */
+export interface ClientRegisterRequest {
+  email: string;
+  fullName: string;
+  phone?: string | null;
+  country?: string | null;
+}
+
+export interface ClientResendCodeRequest {
+  email: string;
+}
+
+export interface ClientCodeSentResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ClientVerifyEmailRequest {
+  email: string;
+  code: string;
+}
+
+export interface ClientVerifyEmailResponse {
+  setPasswordToken: string;
+}
+
+export interface ClientSetPasswordRequest {
+  setPasswordToken: string;
+  /** @minLength 8 */
+  password: string;
+}
+
+export interface ClientLoginRequest {
+  email: string;
+  password: string;
+}
+
+export type ClientProfileStatus =
+  (typeof ClientProfileStatus)[keyof typeof ClientProfileStatus];
+
+export const ClientProfileStatus = {
+  pending_email: "pending_email",
+  active: "active",
+  suspended: "suspended",
+} as const;
+
+export type ClientProfileKycStatus =
+  (typeof ClientProfileKycStatus)[keyof typeof ClientProfileKycStatus];
+
+export const ClientProfileKycStatus = {
+  none: "none",
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+} as const;
+
+export interface ClientProfile {
+  id: number;
+  email: string;
+  fullName: string;
+  phone?: string | null;
+  country?: string | null;
+  status: ClientProfileStatus;
+  kycStatus: ClientProfileKycStatus;
+  createdAt: string;
+}
+
+export interface ClientAuthResponse {
+  client: ClientProfile;
+  token: string;
+}
+
+export interface ClientLogoutResponse {
+  success: boolean;
+}
+
 export interface HealthStatus {
   status: string;
 }

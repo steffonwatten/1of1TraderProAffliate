@@ -36,6 +36,16 @@ import type {
   AuditLogsListResponse,
   AuthResponse,
   CampaignLink,
+  ClientAuthResponse,
+  ClientCodeSentResponse,
+  ClientLoginRequest,
+  ClientLogoutResponse,
+  ClientProfile,
+  ClientRegisterRequest,
+  ClientResendCodeRequest,
+  ClientSetPasswordRequest,
+  ClientVerifyEmailRequest,
+  ClientVerifyEmailResponse,
   CommissionRule,
   CommissionsListResponse,
   CreateCampaignLinkRequest,
@@ -4061,3 +4071,589 @@ export const useUpdateAffiliateProfile = <
 > => {
   return useMutation(getUpdateAffiliateProfileMutationOptions(options));
 };
+
+/**
+ * @summary Register a trading client and email a verification code
+ */
+export const getClientRegisterUrl = () => {
+  return `/api/client/auth/register`;
+};
+
+export const clientRegister = async (
+  clientRegisterRequest: ClientRegisterRequest,
+  options?: RequestInit,
+): Promise<ClientCodeSentResponse> => {
+  return customFetch<ClientCodeSentResponse>(getClientRegisterUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(clientRegisterRequest),
+  });
+};
+
+export const getClientRegisterMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientRegister>>,
+    TError,
+    { data: BodyType<ClientRegisterRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof clientRegister>>,
+  TError,
+  { data: BodyType<ClientRegisterRequest> },
+  TContext
+> => {
+  const mutationKey = ["clientRegister"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof clientRegister>>,
+    { data: BodyType<ClientRegisterRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return clientRegister(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ClientRegisterMutationResult = NonNullable<
+  Awaited<ReturnType<typeof clientRegister>>
+>;
+export type ClientRegisterMutationBody = BodyType<ClientRegisterRequest>;
+export type ClientRegisterMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Register a trading client and email a verification code
+ */
+export const useClientRegister = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientRegister>>,
+    TError,
+    { data: BodyType<ClientRegisterRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof clientRegister>>,
+  TError,
+  { data: BodyType<ClientRegisterRequest> },
+  TContext
+> => {
+  return useMutation(getClientRegisterMutationOptions(options));
+};
+
+/**
+ * @summary Resend the email verification code
+ */
+export const getClientResendCodeUrl = () => {
+  return `/api/client/auth/resend-code`;
+};
+
+export const clientResendCode = async (
+  clientResendCodeRequest: ClientResendCodeRequest,
+  options?: RequestInit,
+): Promise<ClientCodeSentResponse> => {
+  return customFetch<ClientCodeSentResponse>(getClientResendCodeUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(clientResendCodeRequest),
+  });
+};
+
+export const getClientResendCodeMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientResendCode>>,
+    TError,
+    { data: BodyType<ClientResendCodeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof clientResendCode>>,
+  TError,
+  { data: BodyType<ClientResendCodeRequest> },
+  TContext
+> => {
+  const mutationKey = ["clientResendCode"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof clientResendCode>>,
+    { data: BodyType<ClientResendCodeRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return clientResendCode(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ClientResendCodeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof clientResendCode>>
+>;
+export type ClientResendCodeMutationBody = BodyType<ClientResendCodeRequest>;
+export type ClientResendCodeMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Resend the email verification code
+ */
+export const useClientResendCode = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientResendCode>>,
+    TError,
+    { data: BodyType<ClientResendCodeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof clientResendCode>>,
+  TError,
+  { data: BodyType<ClientResendCodeRequest> },
+  TContext
+> => {
+  return useMutation(getClientResendCodeMutationOptions(options));
+};
+
+/**
+ * @summary Verify the emailed code
+ */
+export const getClientVerifyEmailUrl = () => {
+  return `/api/client/auth/verify-email`;
+};
+
+export const clientVerifyEmail = async (
+  clientVerifyEmailRequest: ClientVerifyEmailRequest,
+  options?: RequestInit,
+): Promise<ClientVerifyEmailResponse> => {
+  return customFetch<ClientVerifyEmailResponse>(getClientVerifyEmailUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(clientVerifyEmailRequest),
+  });
+};
+
+export const getClientVerifyEmailMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientVerifyEmail>>,
+    TError,
+    { data: BodyType<ClientVerifyEmailRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof clientVerifyEmail>>,
+  TError,
+  { data: BodyType<ClientVerifyEmailRequest> },
+  TContext
+> => {
+  const mutationKey = ["clientVerifyEmail"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof clientVerifyEmail>>,
+    { data: BodyType<ClientVerifyEmailRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return clientVerifyEmail(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ClientVerifyEmailMutationResult = NonNullable<
+  Awaited<ReturnType<typeof clientVerifyEmail>>
+>;
+export type ClientVerifyEmailMutationBody = BodyType<ClientVerifyEmailRequest>;
+export type ClientVerifyEmailMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Verify the emailed code
+ */
+export const useClientVerifyEmail = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientVerifyEmail>>,
+    TError,
+    { data: BodyType<ClientVerifyEmailRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof clientVerifyEmail>>,
+  TError,
+  { data: BodyType<ClientVerifyEmailRequest> },
+  TContext
+> => {
+  return useMutation(getClientVerifyEmailMutationOptions(options));
+};
+
+/**
+ * @summary Set the password after email verification and log in
+ */
+export const getClientSetPasswordUrl = () => {
+  return `/api/client/auth/set-password`;
+};
+
+export const clientSetPassword = async (
+  clientSetPasswordRequest: ClientSetPasswordRequest,
+  options?: RequestInit,
+): Promise<ClientAuthResponse> => {
+  return customFetch<ClientAuthResponse>(getClientSetPasswordUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(clientSetPasswordRequest),
+  });
+};
+
+export const getClientSetPasswordMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientSetPassword>>,
+    TError,
+    { data: BodyType<ClientSetPasswordRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof clientSetPassword>>,
+  TError,
+  { data: BodyType<ClientSetPasswordRequest> },
+  TContext
+> => {
+  const mutationKey = ["clientSetPassword"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof clientSetPassword>>,
+    { data: BodyType<ClientSetPasswordRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return clientSetPassword(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ClientSetPasswordMutationResult = NonNullable<
+  Awaited<ReturnType<typeof clientSetPassword>>
+>;
+export type ClientSetPasswordMutationBody = BodyType<ClientSetPasswordRequest>;
+export type ClientSetPasswordMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Set the password after email verification and log in
+ */
+export const useClientSetPassword = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientSetPassword>>,
+    TError,
+    { data: BodyType<ClientSetPasswordRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof clientSetPassword>>,
+  TError,
+  { data: BodyType<ClientSetPasswordRequest> },
+  TContext
+> => {
+  return useMutation(getClientSetPasswordMutationOptions(options));
+};
+
+/**
+ * @summary Trading-client login
+ */
+export const getClientLoginUrl = () => {
+  return `/api/client/auth/login`;
+};
+
+export const clientLogin = async (
+  clientLoginRequest: ClientLoginRequest,
+  options?: RequestInit,
+): Promise<ClientAuthResponse> => {
+  return customFetch<ClientAuthResponse>(getClientLoginUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(clientLoginRequest),
+  });
+};
+
+export const getClientLoginMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientLogin>>,
+    TError,
+    { data: BodyType<ClientLoginRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof clientLogin>>,
+  TError,
+  { data: BodyType<ClientLoginRequest> },
+  TContext
+> => {
+  const mutationKey = ["clientLogin"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof clientLogin>>,
+    { data: BodyType<ClientLoginRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return clientLogin(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ClientLoginMutationResult = NonNullable<
+  Awaited<ReturnType<typeof clientLogin>>
+>;
+export type ClientLoginMutationBody = BodyType<ClientLoginRequest>;
+export type ClientLoginMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Trading-client login
+ */
+export const useClientLogin = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientLogin>>,
+    TError,
+    { data: BodyType<ClientLoginRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof clientLogin>>,
+  TError,
+  { data: BodyType<ClientLoginRequest> },
+  TContext
+> => {
+  return useMutation(getClientLoginMutationOptions(options));
+};
+
+/**
+ * @summary Trading-client logout
+ */
+export const getClientLogoutUrl = () => {
+  return `/api/client/auth/logout`;
+};
+
+export const clientLogout = async (
+  options?: RequestInit,
+): Promise<ClientLogoutResponse> => {
+  return customFetch<ClientLogoutResponse>(getClientLogoutUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getClientLogoutMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientLogout>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof clientLogout>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["clientLogout"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof clientLogout>>,
+    void
+  > = () => {
+    return clientLogout(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ClientLogoutMutationResult = NonNullable<
+  Awaited<ReturnType<typeof clientLogout>>
+>;
+
+export type ClientLogoutMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Trading-client logout
+ */
+export const useClientLogout = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clientLogout>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof clientLogout>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getClientLogoutMutationOptions(options));
+};
+
+/**
+ * @summary Get the authenticated trading client
+ */
+export const getGetClientMeUrl = () => {
+  return `/api/client/me`;
+};
+
+export const getClientMe = async (
+  options?: RequestInit,
+): Promise<ClientProfile> => {
+  return customFetch<ClientProfile>(getGetClientMeUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetClientMeQueryKey = () => {
+  return [`/api/client/me`] as const;
+};
+
+export const getGetClientMeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getClientMe>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getClientMe>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetClientMeQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getClientMe>>> = ({
+    signal,
+  }) => getClientMe({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getClientMe>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetClientMeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getClientMe>>
+>;
+export type GetClientMeQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get the authenticated trading client
+ */
+
+export function useGetClientMe<
+  TData = Awaited<ReturnType<typeof getClientMe>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getClientMe>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetClientMeQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}

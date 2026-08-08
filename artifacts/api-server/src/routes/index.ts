@@ -13,6 +13,7 @@ import adminMiscRouter from "./adminMisc.js";
 import adminFinanceRouter from "./adminFinance.js";
 import adminSupportTicketsRouter from "./adminSupportTickets.js";
 import affiliateDashboardRouter from "./affiliateDashboard.js";
+import clientAuthRouter from "./clientAuth.js";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use("/admin", adminFinanceRouter);
 router.use("/admin", adminMiscRouter);
 router.use("/admin", adminSupportTicketsRouter);
 router.use("/affiliate", affiliateDashboardRouter);
+router.use("/client", clientAuthRouter);
 
 export default router;

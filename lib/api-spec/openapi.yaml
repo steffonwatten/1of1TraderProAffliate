@@ -21,6 +21,12 @@ tags:
     description: Webhook handlers
   - name: tracking
     description: Click and session tracking
+  - name: client-auth
+    description: Trading-client signup and authentication
+  - name: client
+    description: Trading-client portal (wallet, KYC, funding, trading accounts)
+  - name: broker-admin
+    description: Broker back-office (KYC review, funding approvals, settings)
 
 paths:
   /healthz:
@@ -998,8 +1004,311 @@ paths:
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
 
+  # Trading-client auth
+  /client/auth/register:
+    post:
+      operationId: clientRegister
+      tags: [client-auth]
+      summary: Register a trading client and email a verification code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientRegisterRequest"
+      responses:
+        "201":
+          description: Verification code sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientCodeSentResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /client/auth/resend-code:
+    post:
+      operationId: clientResendCode
+      tags: [client-auth]
+      summary: Resend the email verification code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientResendCodeRequest"
+      responses:
+        "200":
+          description: Verification code re-sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientCodeSentResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Resend throttled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /client/auth/verify-email:
+    post:
+      operationId: clientVerifyEmail
+      tags: [client-auth]
+      summary: Verify the emailed code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientVerifyEmailRequest"
+      responses:
+        "200":
+          description: Email verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientVerifyEmailResponse"
+        "400":
+          description: Invalid or expired code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /client/auth/set-password:
+    post:
+      operationId: clientSetPassword
+      tags: [client-auth]
+      summary: Set the password after email verification and log in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientSetPasswordRequest"
+      responses:
+        "200":
+          description: Password set, session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientAuthResponse"
+        "400":
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /client/auth/login:
+    post:
+      operationId: clientLogin
+      tags: [client-auth]
+      summary: Trading-client login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientLoginRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientAuthResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /client/auth/logout:
+    post:
+      operationId: clientLogout
+      tags: [client-auth]
+      summary: Trading-client logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientLogoutResponse"
+
+  /client/me:
+    get:
+      operationId: getClientMe
+      tags: [client-auth]
+      summary: Get the authenticated trading client
+      responses:
+        "200":
+          description: Current client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientProfile"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
+    ClientRegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+      required:
+        - email
+        - fullName
+
+    ClientResendCodeRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email
+
+    ClientCodeSentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+
+    ClientVerifyEmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        code:
+          type: string
+      required:
+        - email
+        - code
+
+    ClientVerifyEmailResponse:
+      type: object
+      properties:
+        setPasswordToken:
+          type: string
+      required:
+        - setPasswordToken
+
+    ClientSetPasswordRequest:
+      type: object
+      properties:
+        setPasswordToken:
+          type: string
+        password:
+          type: string
+          minLength: 8
+      required:
+        - setPasswordToken
+        - password
+
+    ClientLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    ClientAuthResponse:
+      type: object
+      properties:
+        client:
+          $ref: "#/components/schemas/ClientProfile"
+        token:
+          type: string
+      required:
+        - client
+        - token
+
+    ClientLogoutResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required:
+        - success
+
+    ClientProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        fullName:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [pending_email, active, suspended]
+        kycStatus:
+          type: string
+          enum: [none, pending, approved, rejected]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - fullName
+        - status
+        - kycStatus
+        - createdAt
+
     HealthStatus:
       type: object
       properties:

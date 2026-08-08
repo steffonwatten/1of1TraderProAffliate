@@ -1120,3 +1120,104 @@ export const UpdateAffiliateProfileResponse = zod.object({
   success: zod.boolean(),
   message: zod.string().optional(),
 });
+
+/**
+ * @summary Register a trading client and email a verification code
+ */
+export const ClientRegisterBody = zod.object({
+  email: zod.string().email(),
+  fullName: zod.string(),
+  phone: zod.string().nullish(),
+  country: zod.string().nullish(),
+});
+
+/**
+ * @summary Resend the email verification code
+ */
+export const ClientResendCodeBody = zod.object({
+  email: zod.string().email(),
+});
+
+export const ClientResendCodeResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string(),
+});
+
+/**
+ * @summary Verify the emailed code
+ */
+export const ClientVerifyEmailBody = zod.object({
+  email: zod.string().email(),
+  code: zod.string(),
+});
+
+export const ClientVerifyEmailResponse = zod.object({
+  setPasswordToken: zod.string(),
+});
+
+/**
+ * @summary Set the password after email verification and log in
+ */
+export const clientSetPasswordBodyPasswordMin = 8;
+
+export const ClientSetPasswordBody = zod.object({
+  setPasswordToken: zod.string(),
+  password: zod.string().min(clientSetPasswordBodyPasswordMin),
+});
+
+export const ClientSetPasswordResponse = zod.object({
+  client: zod.object({
+    id: zod.number(),
+    email: zod.string(),
+    fullName: zod.string(),
+    phone: zod.string().nullish(),
+    country: zod.string().nullish(),
+    status: zod.enum(["pending_email", "active", "suspended"]),
+    kycStatus: zod.enum(["none", "pending", "approved", "rejected"]),
+    createdAt: zod.date(),
+  }),
+  token: zod.string(),
+});
+
+/**
+ * @summary Trading-client login
+ */
+export const ClientLoginBody = zod.object({
+  email: zod.string().email(),
+  password: zod.string(),
+});
+
+export const ClientLoginResponse = zod.object({
+  client: zod.object({
+    id: zod.number(),
+    email: zod.string(),
+    fullName: zod.string(),
+    phone: zod.string().nullish(),
+    country: zod.string().nullish(),
+    status: zod.enum(["pending_email", "active", "suspended"]),
+    kycStatus: zod.enum(["none", "pending", "approved", "rejected"]),
+    createdAt: zod.date(),
+  }),
+  token: zod.string(),
+});
+
+/**
+ * @summary Trading-client logout
+ */
+export const ClientLogoutResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
+ * @summary Get the authenticated trading client
+ */
+export const GetClientMeResponse = zod.object({
+  id: zod.number(),
+  email: zod.string(),
+  fullName: zod.string(),
+  phone: zod.string().nullish(),
+  country: zod.string().nullish(),
+  status: zod.enum(["pending_email", "active", "suspended"]),
+  kycStatus: zod.enum(["none", "pending", "approved", "rejected"]),
+  createdAt: zod.date(),
+});

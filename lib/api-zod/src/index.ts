@@ -9,4 +9,6 @@ export {
   TrackClickResponse,
   HandleWhopWebhookBody,
   MarkPayoutPaidBody,
+  ClientVerifyEmailResponse,
+  ClientLogoutResponse,
 } from "./generated/api";
