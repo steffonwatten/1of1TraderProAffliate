@@ -72,6 +72,40 @@ MT5 trading accounts, broker admin with approval queues; MT5 through a mock
 adapter until the real Manager API is supplied; wire + crypto-deposit-only
 rails; Resend email).
 
+### 1.9 — M9: broker-admin app
+
+**Problem.** The broker needs their own back-office: KYC review with the
+documents viewable, deposit/withdrawal approval queues showing where to pay,
+all trading accounts, and the settings clients see when depositing.
+
+**Change.** Fourth app `artifacts/broker-admin` (localPort 20465,
+`paths=["/broker-admin"]`, registered in `.replit`). Logs in with the
+EXISTING admin users (`/api/auth/login`, shared `auth_token` key); the auth
+context rejects non-admin roles. Pages: Overview (queue counts derived from
+the two list endpoints — no dedicated overview endpoint, deliberately),
+Clients (search + KYC filter), ClientDetail (document viewer via an
+authenticated blob fetch — the one hand-written fetch the plan allows, since
+`<img src>` can't carry a Bearer header — plus approve/reject with notes),
+Transactions (pending queue; review dialog shows wire reference / crypto
+txid / the client's payout bank details), Trading Accounts (live balances),
+Settings (wire details form, crypto address list editor, account-types
+CRUD). Fixed an auth-context bug found by the browser test: deriving the
+user via a useEffect left one render where a valid token looked logged-out,
+bouncing every full page load to /login — now derived synchronously from
+the query result.
+
+**Expected result.** The broker can run the entire operation from
+`/broker-admin`.
+
+**Verified by.** MEASURED with a Playwright run: admin login → Overview;
+Clients list; ClientDetail renders the uploaded KYC PNG through the
+authenticated viewer; pending withdrawal reviewed in the dialog (payout bank
+details visible) and approved through the UI — DB row flipped to
+`approved`; Trading Accounts and Settings render. Typecheck + build clean
+(CSS 34.6 KB).
+
+---
+
 ### 1.8 — M8: client-portal feature pages
 
 **Problem.** The portal shell needed its real pages: dashboard, deposit
