@@ -72,6 +72,35 @@ MT5 trading accounts, broker admin with approval queues; MT5 through a mock
 adapter until the real Manager API is supplied; wire + crypto-deposit-only
 rails; Resend email).
 
+### 1.7 — M4: client-portal app scaffold + signup/login UI
+
+**Problem.** Clients need a website to sign up on and a portal to use — the
+third deployable app in the workspace.
+
+**Change.** New `artifacts/client-portal` (React 19 + Vite + Tailwind 4 +
+wouter + TanStack Query) following the affiliate-dashboard scaffolding:
+PORT/BASE_PATH-guarded vite config, `/api` dev proxy, artifact.toml on
+localPort 20464 with `paths=["/portal"]`, registered in `.replit` and the
+pnpm workspace. Only the 18 shadcn primitives the portal actually uses were
+copied — not the whole component library (GENERAL-keeping-it-clean.md).
+Dark navy + signal-orange theme. Auth: `client_token` in localStorage via
+`setAuthTokenGetter` (distinct from the affiliate key), ClientAuthProvider
+re-validates against /client/me, Protected wrapper redirects to /login.
+Pages: Signup → VerifyEmail (input-otp, auto-submits at 6 digits, resend) →
+SetPassword (auto-login) → Login; PortalLayout with sidebar
+(Dashboard/Deposit/Transfer/Withdraw/Trading Accounts/History/Verification)
++ KYC status banner; portal pages stubbed (filled in M8).
+
+**Expected result.** `/portal` serves the signup funnel and an authenticated
+shell against the live API.
+
+**Verified by.** MEASURED: typecheck clean; production build emits 32 KB CSS
+(styling present — the right signal per GENERAL-writing-code.md §8); dev
+server serves `/portal/` 200 and proxies `/api/healthz`. Full-browser
+end-to-end pass happens in M10.
+
+---
+
 ### 1.6 — M7: trading accounts backend (KYC-gated MT5 provisioning)
 
 **Problem.** Clients need to open MT5 accounts choosing an account type and
