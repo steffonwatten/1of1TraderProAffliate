@@ -15,7 +15,10 @@ import adminSupportTicketsRouter from "./adminSupportTickets.js";
 import affiliateDashboardRouter from "./affiliateDashboard.js";
 import clientAuthRouter from "./clientAuth.js";
 import clientKycRouter from "./clientKyc.js";
+import clientFundingRouter from "./clientFunding.js";
 import adminBrokerKycRouter from "./adminBrokerKyc.js";
+import adminBrokerFinanceRouter from "./adminBrokerFinance.js";
+import adminBrokerSettingsRouter from "./adminBrokerSettings.js";
 
 const router: IRouter = Router();
 
@@ -35,6 +38,9 @@ router.use("/admin", adminSupportTicketsRouter);
 router.use("/affiliate", affiliateDashboardRouter);
 router.use("/client", clientAuthRouter);
 router.use("/client", clientKycRouter);
+router.use("/client", clientFundingRouter);
 router.use("/admin/broker", adminBrokerKycRouter);
+router.use("/admin/broker", adminBrokerFinanceRouter);
+router.use("/admin/broker", adminBrokerSettingsRouter);
 
 export default router;

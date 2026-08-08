@@ -72,6 +72,45 @@ MT5 trading accounts, broker admin with approval queues; MT5 through a mock
 adapter until the real Manager API is supplied; wire + crypto-deposit-only
 rails; Resend email).
 
+### 1.5 — M6: ledger + funding backend (deposit / withdraw / transfer)
+
+**Problem.** The money core: clients submit wire/crypto deposit notices and
+withdrawal requests that the broker approves; transfers between wallet and
+MT5 settle instantly through the adapter. Balances must be impossible to
+corrupt by concurrency or double-approval.
+
+**Change.** `lib/brokerLedger.ts` — every wallet mutation happens in SQL on
+the numeric column inside the same `db.transaction()` as its ledger row.
+Debits use an atomic conditional UPDATE (`WHERE balance >= amount`) as the
+overdraft guard; decisions guard `status='pending'` in the UPDATE so a second
+decision matches zero rows (409). Deposit approve credits; withdrawal
+request debits (hold), reject re-credits; wallet→MT5 debits + records
+pending before calling the adapter, flipping to approved+ticket or (on
+adapter failure) failed + compensating re-credit; MT5→wallet calls the
+adapter first, then credits atomically. `lib/brokerSettings.ts` — Zod-typed
+wire-details/crypto-addresses in broker_settings (validated on read AND
+write). Routes: `clientFunding.ts` (dashboard, wallet, transactions,
+deposit methods, deposits, bank accounts CRUD w/ soft delete, withdrawals,
+transfers, account types), `adminBrokerFinance.ts` (joined transaction list,
+decision + audit log + best-effort email), `adminBrokerSettings.ts`
+(wire/crypto settings, account-types CRUD). `scripts/src/seed-broker.ts`
+seeds Standard/Pro account types + placeholder deposit settings.
+
+**Expected result.** Full funding lifecycle with a clean audit trail; no
+code path can move money without a ledger row.
+
+**Verified by.** MEASURED via curl against local Postgres + mock MT5: wire
+deposit 500 pending (balance 0) → approve → 500.00; double-approve 409;
+crypto deposit rejected leaves balance; withdrawal 200 holds (300.00),
+reject re-credits (500.00), second withdrawal approved leaves 350.00;
+overdraft withdrawal 400; transfer 100→MT5 (wallet 250, MT5 100.00, ticket
+recorded), 40 back (290.00/60.00); MT5 overdraw and wallet overdraw both
+400; transfer against a nonexistent MT5 login → 502, wallet unchanged
+(290.00), ledger row `transfer_to_mt5/failed`. Amount validation rejects
+3-dp values.
+
+---
+
 ### 1.4 — M5: KYC backend (upload + admin review)
 
 **Problem.** Clients must upload identity documents and be blocked from

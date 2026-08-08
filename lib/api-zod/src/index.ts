@@ -12,4 +12,8 @@ export {
   ClientVerifyEmailResponse,
   ClientLogoutResponse,
   UploadClientKycDocumentBody,
+  DeleteClientBankAccountResponse,
+  UpdateBrokerAccountTypeResponse,
+  UpdateBrokerCryptoAddressesResponse,
+  UpdateBrokerWireSettingsResponse,
 } from "./generated/api";

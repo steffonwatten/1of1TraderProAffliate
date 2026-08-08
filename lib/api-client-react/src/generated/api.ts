@@ -35,13 +35,23 @@ import type {
   ApplicationsListResponse,
   AuditLogsListResponse,
   AuthResponse,
+  BrokerAccountTypesResponse,
   BrokerClientDetailResponse,
   BrokerClientListResponse,
+  BrokerCryptoAddressesResponse,
   BrokerKycDecisionRequest,
   BrokerKycDecisionResponse,
+  BrokerTransactionDecisionRequest,
+  BrokerTransactionDecisionResponse,
+  BrokerTransactionListResponse,
+  BrokerWireSettingsResponse,
   CampaignLink,
+  ClientAccountTypesResponse,
   ClientAuthResponse,
+  ClientBankAccountListResponse,
   ClientCodeSentResponse,
+  ClientDashboardResponse,
+  ClientDepositMethodsResponse,
   ClientKycStatusResponse,
   ClientKycUploadResponse,
   ClientLoginRequest,
@@ -50,14 +60,27 @@ import type {
   ClientRegisterRequest,
   ClientResendCodeRequest,
   ClientSetPasswordRequest,
+  ClientTransactionListResponse,
   ClientVerifyEmailRequest,
   ClientVerifyEmailResponse,
+  ClientWalletResponse,
   CommissionRule,
   CommissionsListResponse,
+  CreateBrokerAccountTypeRequest,
+  CreateBrokerAccountTypeResponse,
   CreateCampaignLinkRequest,
+  CreateClientBankAccountRequest,
+  CreateClientBankAccountResponse,
+  CreateClientDepositRequest,
+  CreateClientDepositResponse,
+  CreateClientTransferRequest,
+  CreateClientTransferResponse,
+  CreateClientWithdrawalRequest,
+  CreateClientWithdrawalResponse,
   CreateCommissionRuleRequest,
   CreatePayoutRequest,
   CreateUserRequest,
+  DeleteClientBankAccountResponse,
   EmailLogsListResponse,
   ErrorResponse,
   ExportPayoutsParams,
@@ -77,6 +100,8 @@ import type {
   HandleWhopWebhookBody,
   HealthStatus,
   ListBrokerClientsParams,
+  ListBrokerTransactionsParams,
+  ListClientTransactionsParams,
   LoginRequest,
   MarkPayoutPaidBody,
   MembershipsListResponse,
@@ -89,6 +114,12 @@ import type {
   TrackLeadRequest,
   UpdateAffiliateProfileRequest,
   UpdateAffiliateStatusRequest,
+  UpdateBrokerAccountTypeRequest,
+  UpdateBrokerAccountTypeResponse,
+  UpdateBrokerCryptoAddressesRequest,
+  UpdateBrokerCryptoAddressesResponse,
+  UpdateBrokerWireSettingsRequest,
+  UpdateBrokerWireSettingsResponse,
   UpdateCommissionRequest,
   UploadClientKycDocumentBody,
   User,
@@ -4829,6 +4860,1734 @@ export const useUploadClientKycDocument = <
   TContext
 > => {
   return useMutation(getUploadClientKycDocumentMutationOptions(options));
+};
+
+/**
+ * @summary Client dashboard (balance, KYC state, recent transactions)
+ */
+export const getGetClientDashboardUrl = () => {
+  return `/api/client/dashboard`;
+};
+
+export const getClientDashboard = async (
+  options?: RequestInit,
+): Promise<ClientDashboardResponse> => {
+  return customFetch<ClientDashboardResponse>(getGetClientDashboardUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetClientDashboardQueryKey = () => {
+  return [`/api/client/dashboard`] as const;
+};
+
+export const getGetClientDashboardQueryOptions = <
+  TData = Awaited<ReturnType<typeof getClientDashboard>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getClientDashboard>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetClientDashboardQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getClientDashboard>>
+  > = ({ signal }) => getClientDashboard({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getClientDashboard>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetClientDashboardQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getClientDashboard>>
+>;
+export type GetClientDashboardQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Client dashboard (balance, KYC state, recent transactions)
+ */
+
+export function useGetClientDashboard<
+  TData = Awaited<ReturnType<typeof getClientDashboard>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getClientDashboard>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetClientDashboardQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get the client's wallet
+ */
+export const getGetClientWalletUrl = () => {
+  return `/api/client/wallet`;
+};
+
+export const getClientWallet = async (
+  options?: RequestInit,
+): Promise<ClientWalletResponse> => {
+  return customFetch<ClientWalletResponse>(getGetClientWalletUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetClientWalletQueryKey = () => {
+  return [`/api/client/wallet`] as const;
+};
+
+export const getGetClientWalletQueryOptions = <
+  TData = Awaited<ReturnType<typeof getClientWallet>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getClientWallet>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetClientWalletQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getClientWallet>>> = ({
+    signal,
+  }) => getClientWallet({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getClientWallet>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetClientWalletQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getClientWallet>>
+>;
+export type GetClientWalletQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get the client's wallet
+ */
+
+export function useGetClientWallet<
+  TData = Awaited<ReturnType<typeof getClientWallet>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getClientWallet>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetClientWalletQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List the client's transactions
+ */
+export const getListClientTransactionsUrl = (
+  params?: ListClientTransactionsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/client/transactions?${stringifiedParams}`
+    : `/api/client/transactions`;
+};
+
+export const listClientTransactions = async (
+  params?: ListClientTransactionsParams,
+  options?: RequestInit,
+): Promise<ClientTransactionListResponse> => {
+  return customFetch<ClientTransactionListResponse>(
+    getListClientTransactionsUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListClientTransactionsQueryKey = (
+  params?: ListClientTransactionsParams,
+) => {
+  return [`/api/client/transactions`, ...(params ? [params] : [])] as const;
+};
+
+export const getListClientTransactionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listClientTransactions>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListClientTransactionsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listClientTransactions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListClientTransactionsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listClientTransactions>>
+  > = ({ signal }) =>
+    listClientTransactions(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listClientTransactions>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListClientTransactionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listClientTransactions>>
+>;
+export type ListClientTransactionsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List the client's transactions
+ */
+
+export function useListClientTransactions<
+  TData = Awaited<ReturnType<typeof listClientTransactions>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListClientTransactionsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listClientTransactions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListClientTransactionsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get available deposit methods (wire details, crypto addresses)
+ */
+export const getGetClientDepositMethodsUrl = () => {
+  return `/api/client/deposit/methods`;
+};
+
+export const getClientDepositMethods = async (
+  options?: RequestInit,
+): Promise<ClientDepositMethodsResponse> => {
+  return customFetch<ClientDepositMethodsResponse>(
+    getGetClientDepositMethodsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetClientDepositMethodsQueryKey = () => {
+  return [`/api/client/deposit/methods`] as const;
+};
+
+export const getGetClientDepositMethodsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getClientDepositMethods>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getClientDepositMethods>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetClientDepositMethodsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getClientDepositMethods>>
+  > = ({ signal }) => getClientDepositMethods({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getClientDepositMethods>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetClientDepositMethodsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getClientDepositMethods>>
+>;
+export type GetClientDepositMethodsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get available deposit methods (wire details, crypto addresses)
+ */
+
+export function useGetClientDepositMethods<
+  TData = Awaited<ReturnType<typeof getClientDepositMethods>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getClientDepositMethods>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetClientDepositMethodsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Submit a deposit notice (wire or crypto), pending admin approval
+ */
+export const getCreateClientDepositUrl = () => {
+  return `/api/client/deposits`;
+};
+
+export const createClientDeposit = async (
+  createClientDepositRequest: CreateClientDepositRequest,
+  options?: RequestInit,
+): Promise<CreateClientDepositResponse> => {
+  return customFetch<CreateClientDepositResponse>(getCreateClientDepositUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createClientDepositRequest),
+  });
+};
+
+export const getCreateClientDepositMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createClientDeposit>>,
+    TError,
+    { data: BodyType<CreateClientDepositRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createClientDeposit>>,
+  TError,
+  { data: BodyType<CreateClientDepositRequest> },
+  TContext
+> => {
+  const mutationKey = ["createClientDeposit"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createClientDeposit>>,
+    { data: BodyType<CreateClientDepositRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createClientDeposit(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateClientDepositMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createClientDeposit>>
+>;
+export type CreateClientDepositMutationBody =
+  BodyType<CreateClientDepositRequest>;
+export type CreateClientDepositMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Submit a deposit notice (wire or crypto), pending admin approval
+ */
+export const useCreateClientDeposit = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createClientDeposit>>,
+    TError,
+    { data: BodyType<CreateClientDepositRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createClientDeposit>>,
+  TError,
+  { data: BodyType<CreateClientDepositRequest> },
+  TContext
+> => {
+  return useMutation(getCreateClientDepositMutationOptions(options));
+};
+
+/**
+ * @summary List the client's saved bank accounts
+ */
+export const getListClientBankAccountsUrl = () => {
+  return `/api/client/bank-accounts`;
+};
+
+export const listClientBankAccounts = async (
+  options?: RequestInit,
+): Promise<ClientBankAccountListResponse> => {
+  return customFetch<ClientBankAccountListResponse>(
+    getListClientBankAccountsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListClientBankAccountsQueryKey = () => {
+  return [`/api/client/bank-accounts`] as const;
+};
+
+export const getListClientBankAccountsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listClientBankAccounts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listClientBankAccounts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListClientBankAccountsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listClientBankAccounts>>
+  > = ({ signal }) => listClientBankAccounts({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listClientBankAccounts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListClientBankAccountsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listClientBankAccounts>>
+>;
+export type ListClientBankAccountsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List the client's saved bank accounts
+ */
+
+export function useListClientBankAccounts<
+  TData = Awaited<ReturnType<typeof listClientBankAccounts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listClientBankAccounts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListClientBankAccountsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Save a bank account for withdrawals
+ */
+export const getCreateClientBankAccountUrl = () => {
+  return `/api/client/bank-accounts`;
+};
+
+export const createClientBankAccount = async (
+  createClientBankAccountRequest: CreateClientBankAccountRequest,
+  options?: RequestInit,
+): Promise<CreateClientBankAccountResponse> => {
+  return customFetch<CreateClientBankAccountResponse>(
+    getCreateClientBankAccountUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(createClientBankAccountRequest),
+    },
+  );
+};
+
+export const getCreateClientBankAccountMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createClientBankAccount>>,
+    TError,
+    { data: BodyType<CreateClientBankAccountRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createClientBankAccount>>,
+  TError,
+  { data: BodyType<CreateClientBankAccountRequest> },
+  TContext
+> => {
+  const mutationKey = ["createClientBankAccount"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createClientBankAccount>>,
+    { data: BodyType<CreateClientBankAccountRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createClientBankAccount(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateClientBankAccountMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createClientBankAccount>>
+>;
+export type CreateClientBankAccountMutationBody =
+  BodyType<CreateClientBankAccountRequest>;
+export type CreateClientBankAccountMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Save a bank account for withdrawals
+ */
+export const useCreateClientBankAccount = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createClientBankAccount>>,
+    TError,
+    { data: BodyType<CreateClientBankAccountRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createClientBankAccount>>,
+  TError,
+  { data: BodyType<CreateClientBankAccountRequest> },
+  TContext
+> => {
+  return useMutation(getCreateClientBankAccountMutationOptions(options));
+};
+
+/**
+ * @summary Remove a saved bank account
+ */
+export const getDeleteClientBankAccountUrl = (id: number) => {
+  return `/api/client/bank-accounts/${id}`;
+};
+
+export const deleteClientBankAccount = async (
+  id: number,
+  options?: RequestInit,
+): Promise<DeleteClientBankAccountResponse> => {
+  return customFetch<DeleteClientBankAccountResponse>(
+    getDeleteClientBankAccountUrl(id),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
+};
+
+export const getDeleteClientBankAccountMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteClientBankAccount>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteClientBankAccount>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteClientBankAccount"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteClientBankAccount>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteClientBankAccount(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteClientBankAccountMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteClientBankAccount>>
+>;
+
+export type DeleteClientBankAccountMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Remove a saved bank account
+ */
+export const useDeleteClientBankAccount = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteClientBankAccount>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteClientBankAccount>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeleteClientBankAccountMutationOptions(options));
+};
+
+/**
+ * @summary Request a withdrawal to a saved bank account (funds held)
+ */
+export const getCreateClientWithdrawalUrl = () => {
+  return `/api/client/withdrawals`;
+};
+
+export const createClientWithdrawal = async (
+  createClientWithdrawalRequest: CreateClientWithdrawalRequest,
+  options?: RequestInit,
+): Promise<CreateClientWithdrawalResponse> => {
+  return customFetch<CreateClientWithdrawalResponse>(
+    getCreateClientWithdrawalUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(createClientWithdrawalRequest),
+    },
+  );
+};
+
+export const getCreateClientWithdrawalMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createClientWithdrawal>>,
+    TError,
+    { data: BodyType<CreateClientWithdrawalRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createClientWithdrawal>>,
+  TError,
+  { data: BodyType<CreateClientWithdrawalRequest> },
+  TContext
+> => {
+  const mutationKey = ["createClientWithdrawal"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createClientWithdrawal>>,
+    { data: BodyType<CreateClientWithdrawalRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createClientWithdrawal(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateClientWithdrawalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createClientWithdrawal>>
+>;
+export type CreateClientWithdrawalMutationBody =
+  BodyType<CreateClientWithdrawalRequest>;
+export type CreateClientWithdrawalMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Request a withdrawal to a saved bank account (funds held)
+ */
+export const useCreateClientWithdrawal = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createClientWithdrawal>>,
+    TError,
+    { data: BodyType<CreateClientWithdrawalRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createClientWithdrawal>>,
+  TError,
+  { data: BodyType<CreateClientWithdrawalRequest> },
+  TContext
+> => {
+  return useMutation(getCreateClientWithdrawalMutationOptions(options));
+};
+
+/**
+ * @summary Transfer between wallet and a trading account
+ */
+export const getCreateClientTransferUrl = () => {
+  return `/api/client/transfers`;
+};
+
+export const createClientTransfer = async (
+  createClientTransferRequest: CreateClientTransferRequest,
+  options?: RequestInit,
+): Promise<CreateClientTransferResponse> => {
+  return customFetch<CreateClientTransferResponse>(
+    getCreateClientTransferUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(createClientTransferRequest),
+    },
+  );
+};
+
+export const getCreateClientTransferMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createClientTransfer>>,
+    TError,
+    { data: BodyType<CreateClientTransferRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createClientTransfer>>,
+  TError,
+  { data: BodyType<CreateClientTransferRequest> },
+  TContext
+> => {
+  const mutationKey = ["createClientTransfer"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createClientTransfer>>,
+    { data: BodyType<CreateClientTransferRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createClientTransfer(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateClientTransferMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createClientTransfer>>
+>;
+export type CreateClientTransferMutationBody =
+  BodyType<CreateClientTransferRequest>;
+export type CreateClientTransferMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Transfer between wallet and a trading account
+ */
+export const useCreateClientTransfer = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createClientTransfer>>,
+    TError,
+    { data: BodyType<CreateClientTransferRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createClientTransfer>>,
+  TError,
+  { data: BodyType<CreateClientTransferRequest> },
+  TContext
+> => {
+  return useMutation(getCreateClientTransferMutationOptions(options));
+};
+
+/**
+ * @summary List active account types available to open
+ */
+export const getListClientAccountTypesUrl = () => {
+  return `/api/client/account-types`;
+};
+
+export const listClientAccountTypes = async (
+  options?: RequestInit,
+): Promise<ClientAccountTypesResponse> => {
+  return customFetch<ClientAccountTypesResponse>(
+    getListClientAccountTypesUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListClientAccountTypesQueryKey = () => {
+  return [`/api/client/account-types`] as const;
+};
+
+export const getListClientAccountTypesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listClientAccountTypes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listClientAccountTypes>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListClientAccountTypesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listClientAccountTypes>>
+  > = ({ signal }) => listClientAccountTypes({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listClientAccountTypes>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListClientAccountTypesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listClientAccountTypes>>
+>;
+export type ListClientAccountTypesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List active account types available to open
+ */
+
+export function useListClientAccountTypes<
+  TData = Awaited<ReturnType<typeof listClientAccountTypes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listClientAccountTypes>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListClientAccountTypesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List transactions across all clients
+ */
+export const getListBrokerTransactionsUrl = (
+  params?: ListBrokerTransactionsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/admin/broker/transactions?${stringifiedParams}`
+    : `/api/admin/broker/transactions`;
+};
+
+export const listBrokerTransactions = async (
+  params?: ListBrokerTransactionsParams,
+  options?: RequestInit,
+): Promise<BrokerTransactionListResponse> => {
+  return customFetch<BrokerTransactionListResponse>(
+    getListBrokerTransactionsUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListBrokerTransactionsQueryKey = (
+  params?: ListBrokerTransactionsParams,
+) => {
+  return [
+    `/api/admin/broker/transactions`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getListBrokerTransactionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listBrokerTransactions>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListBrokerTransactionsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listBrokerTransactions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListBrokerTransactionsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listBrokerTransactions>>
+  > = ({ signal }) =>
+    listBrokerTransactions(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listBrokerTransactions>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListBrokerTransactionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listBrokerTransactions>>
+>;
+export type ListBrokerTransactionsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List transactions across all clients
+ */
+
+export function useListBrokerTransactions<
+  TData = Awaited<ReturnType<typeof listBrokerTransactions>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListBrokerTransactionsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listBrokerTransactions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListBrokerTransactionsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Approve or reject a pending deposit/withdrawal
+ */
+export const getDecideBrokerTransactionUrl = (id: number) => {
+  return `/api/admin/broker/transactions/${id}/decision`;
+};
+
+export const decideBrokerTransaction = async (
+  id: number,
+  brokerTransactionDecisionRequest: BrokerTransactionDecisionRequest,
+  options?: RequestInit,
+): Promise<BrokerTransactionDecisionResponse> => {
+  return customFetch<BrokerTransactionDecisionResponse>(
+    getDecideBrokerTransactionUrl(id),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(brokerTransactionDecisionRequest),
+    },
+  );
+};
+
+export const getDecideBrokerTransactionMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof decideBrokerTransaction>>,
+    TError,
+    { id: number; data: BodyType<BrokerTransactionDecisionRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof decideBrokerTransaction>>,
+  TError,
+  { id: number; data: BodyType<BrokerTransactionDecisionRequest> },
+  TContext
+> => {
+  const mutationKey = ["decideBrokerTransaction"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof decideBrokerTransaction>>,
+    { id: number; data: BodyType<BrokerTransactionDecisionRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return decideBrokerTransaction(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DecideBrokerTransactionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof decideBrokerTransaction>>
+>;
+export type DecideBrokerTransactionMutationBody =
+  BodyType<BrokerTransactionDecisionRequest>;
+export type DecideBrokerTransactionMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Approve or reject a pending deposit/withdrawal
+ */
+export const useDecideBrokerTransaction = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof decideBrokerTransaction>>,
+    TError,
+    { id: number; data: BodyType<BrokerTransactionDecisionRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof decideBrokerTransaction>>,
+  TError,
+  { id: number; data: BodyType<BrokerTransactionDecisionRequest> },
+  TContext
+> => {
+  return useMutation(getDecideBrokerTransactionMutationOptions(options));
+};
+
+/**
+ * @summary Get the wire transfer details shown to depositing clients
+ */
+export const getGetBrokerWireSettingsUrl = () => {
+  return `/api/admin/broker/settings/wire`;
+};
+
+export const getBrokerWireSettings = async (
+  options?: RequestInit,
+): Promise<BrokerWireSettingsResponse> => {
+  return customFetch<BrokerWireSettingsResponse>(
+    getGetBrokerWireSettingsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetBrokerWireSettingsQueryKey = () => {
+  return [`/api/admin/broker/settings/wire`] as const;
+};
+
+export const getGetBrokerWireSettingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBrokerWireSettings>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getBrokerWireSettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetBrokerWireSettingsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getBrokerWireSettings>>
+  > = ({ signal }) => getBrokerWireSettings({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getBrokerWireSettings>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetBrokerWireSettingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBrokerWireSettings>>
+>;
+export type GetBrokerWireSettingsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get the wire transfer details shown to depositing clients
+ */
+
+export function useGetBrokerWireSettings<
+  TData = Awaited<ReturnType<typeof getBrokerWireSettings>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getBrokerWireSettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetBrokerWireSettingsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update the wire transfer details
+ */
+export const getUpdateBrokerWireSettingsUrl = () => {
+  return `/api/admin/broker/settings/wire`;
+};
+
+export const updateBrokerWireSettings = async (
+  updateBrokerWireSettingsRequest: UpdateBrokerWireSettingsRequest,
+  options?: RequestInit,
+): Promise<UpdateBrokerWireSettingsResponse> => {
+  return customFetch<UpdateBrokerWireSettingsResponse>(
+    getUpdateBrokerWireSettingsUrl(),
+    {
+      ...options,
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(updateBrokerWireSettingsRequest),
+    },
+  );
+};
+
+export const getUpdateBrokerWireSettingsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateBrokerWireSettings>>,
+    TError,
+    { data: BodyType<UpdateBrokerWireSettingsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateBrokerWireSettings>>,
+  TError,
+  { data: BodyType<UpdateBrokerWireSettingsRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateBrokerWireSettings"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateBrokerWireSettings>>,
+    { data: BodyType<UpdateBrokerWireSettingsRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return updateBrokerWireSettings(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateBrokerWireSettingsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateBrokerWireSettings>>
+>;
+export type UpdateBrokerWireSettingsMutationBody =
+  BodyType<UpdateBrokerWireSettingsRequest>;
+export type UpdateBrokerWireSettingsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update the wire transfer details
+ */
+export const useUpdateBrokerWireSettings = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateBrokerWireSettings>>,
+    TError,
+    { data: BodyType<UpdateBrokerWireSettingsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateBrokerWireSettings>>,
+  TError,
+  { data: BodyType<UpdateBrokerWireSettingsRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateBrokerWireSettingsMutationOptions(options));
+};
+
+/**
+ * @summary Get the static crypto deposit addresses
+ */
+export const getGetBrokerCryptoAddressesUrl = () => {
+  return `/api/admin/broker/settings/crypto-addresses`;
+};
+
+export const getBrokerCryptoAddresses = async (
+  options?: RequestInit,
+): Promise<BrokerCryptoAddressesResponse> => {
+  return customFetch<BrokerCryptoAddressesResponse>(
+    getGetBrokerCryptoAddressesUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetBrokerCryptoAddressesQueryKey = () => {
+  return [`/api/admin/broker/settings/crypto-addresses`] as const;
+};
+
+export const getGetBrokerCryptoAddressesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBrokerCryptoAddresses>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getBrokerCryptoAddresses>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetBrokerCryptoAddressesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getBrokerCryptoAddresses>>
+  > = ({ signal }) => getBrokerCryptoAddresses({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getBrokerCryptoAddresses>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetBrokerCryptoAddressesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBrokerCryptoAddresses>>
+>;
+export type GetBrokerCryptoAddressesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get the static crypto deposit addresses
+ */
+
+export function useGetBrokerCryptoAddresses<
+  TData = Awaited<ReturnType<typeof getBrokerCryptoAddresses>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getBrokerCryptoAddresses>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetBrokerCryptoAddressesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update the static crypto deposit addresses
+ */
+export const getUpdateBrokerCryptoAddressesUrl = () => {
+  return `/api/admin/broker/settings/crypto-addresses`;
+};
+
+export const updateBrokerCryptoAddresses = async (
+  updateBrokerCryptoAddressesRequest: UpdateBrokerCryptoAddressesRequest,
+  options?: RequestInit,
+): Promise<UpdateBrokerCryptoAddressesResponse> => {
+  return customFetch<UpdateBrokerCryptoAddressesResponse>(
+    getUpdateBrokerCryptoAddressesUrl(),
+    {
+      ...options,
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(updateBrokerCryptoAddressesRequest),
+    },
+  );
+};
+
+export const getUpdateBrokerCryptoAddressesMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateBrokerCryptoAddresses>>,
+    TError,
+    { data: BodyType<UpdateBrokerCryptoAddressesRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateBrokerCryptoAddresses>>,
+  TError,
+  { data: BodyType<UpdateBrokerCryptoAddressesRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateBrokerCryptoAddresses"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateBrokerCryptoAddresses>>,
+    { data: BodyType<UpdateBrokerCryptoAddressesRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return updateBrokerCryptoAddresses(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateBrokerCryptoAddressesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateBrokerCryptoAddresses>>
+>;
+export type UpdateBrokerCryptoAddressesMutationBody =
+  BodyType<UpdateBrokerCryptoAddressesRequest>;
+export type UpdateBrokerCryptoAddressesMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update the static crypto deposit addresses
+ */
+export const useUpdateBrokerCryptoAddresses = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateBrokerCryptoAddresses>>,
+    TError,
+    { data: BodyType<UpdateBrokerCryptoAddressesRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateBrokerCryptoAddresses>>,
+  TError,
+  { data: BodyType<UpdateBrokerCryptoAddressesRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateBrokerCryptoAddressesMutationOptions(options));
+};
+
+/**
+ * @summary List all account types (including inactive)
+ */
+export const getListBrokerAccountTypesUrl = () => {
+  return `/api/admin/broker/account-types`;
+};
+
+export const listBrokerAccountTypes = async (
+  options?: RequestInit,
+): Promise<BrokerAccountTypesResponse> => {
+  return customFetch<BrokerAccountTypesResponse>(
+    getListBrokerAccountTypesUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListBrokerAccountTypesQueryKey = () => {
+  return [`/api/admin/broker/account-types`] as const;
+};
+
+export const getListBrokerAccountTypesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listBrokerAccountTypes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listBrokerAccountTypes>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListBrokerAccountTypesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listBrokerAccountTypes>>
+  > = ({ signal }) => listBrokerAccountTypes({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listBrokerAccountTypes>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListBrokerAccountTypesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listBrokerAccountTypes>>
+>;
+export type ListBrokerAccountTypesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all account types (including inactive)
+ */
+
+export function useListBrokerAccountTypes<
+  TData = Awaited<ReturnType<typeof listBrokerAccountTypes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listBrokerAccountTypes>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListBrokerAccountTypesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create an account type
+ */
+export const getCreateBrokerAccountTypeUrl = () => {
+  return `/api/admin/broker/account-types`;
+};
+
+export const createBrokerAccountType = async (
+  createBrokerAccountTypeRequest: CreateBrokerAccountTypeRequest,
+  options?: RequestInit,
+): Promise<CreateBrokerAccountTypeResponse> => {
+  return customFetch<CreateBrokerAccountTypeResponse>(
+    getCreateBrokerAccountTypeUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(createBrokerAccountTypeRequest),
+    },
+  );
+};
+
+export const getCreateBrokerAccountTypeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createBrokerAccountType>>,
+    TError,
+    { data: BodyType<CreateBrokerAccountTypeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createBrokerAccountType>>,
+  TError,
+  { data: BodyType<CreateBrokerAccountTypeRequest> },
+  TContext
+> => {
+  const mutationKey = ["createBrokerAccountType"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createBrokerAccountType>>,
+    { data: BodyType<CreateBrokerAccountTypeRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createBrokerAccountType(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateBrokerAccountTypeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createBrokerAccountType>>
+>;
+export type CreateBrokerAccountTypeMutationBody =
+  BodyType<CreateBrokerAccountTypeRequest>;
+export type CreateBrokerAccountTypeMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create an account type
+ */
+export const useCreateBrokerAccountType = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createBrokerAccountType>>,
+    TError,
+    { data: BodyType<CreateBrokerAccountTypeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createBrokerAccountType>>,
+  TError,
+  { data: BodyType<CreateBrokerAccountTypeRequest> },
+  TContext
+> => {
+  return useMutation(getCreateBrokerAccountTypeMutationOptions(options));
+};
+
+/**
+ * @summary Update an account type
+ */
+export const getUpdateBrokerAccountTypeUrl = (id: number) => {
+  return `/api/admin/broker/account-types/${id}`;
+};
+
+export const updateBrokerAccountType = async (
+  id: number,
+  updateBrokerAccountTypeRequest: UpdateBrokerAccountTypeRequest,
+  options?: RequestInit,
+): Promise<UpdateBrokerAccountTypeResponse> => {
+  return customFetch<UpdateBrokerAccountTypeResponse>(
+    getUpdateBrokerAccountTypeUrl(id),
+    {
+      ...options,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(updateBrokerAccountTypeRequest),
+    },
+  );
+};
+
+export const getUpdateBrokerAccountTypeMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateBrokerAccountType>>,
+    TError,
+    { id: number; data: BodyType<UpdateBrokerAccountTypeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateBrokerAccountType>>,
+  TError,
+  { id: number; data: BodyType<UpdateBrokerAccountTypeRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateBrokerAccountType"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateBrokerAccountType>>,
+    { id: number; data: BodyType<UpdateBrokerAccountTypeRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateBrokerAccountType(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateBrokerAccountTypeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateBrokerAccountType>>
+>;
+export type UpdateBrokerAccountTypeMutationBody =
+  BodyType<UpdateBrokerAccountTypeRequest>;
+export type UpdateBrokerAccountTypeMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Update an account type
+ */
+export const useUpdateBrokerAccountType = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateBrokerAccountType>>,
+    TError,
+    { id: number; data: BodyType<UpdateBrokerAccountTypeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateBrokerAccountType>>,
+  TError,
+  { id: number; data: BodyType<UpdateBrokerAccountTypeRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateBrokerAccountTypeMutationOptions(options));
 };
 
 /**

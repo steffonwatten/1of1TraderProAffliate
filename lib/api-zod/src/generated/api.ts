@@ -1249,6 +1249,465 @@ export const UploadClientKycDocumentBody = zod.object({
 });
 
 /**
+ * @summary Client dashboard (balance, KYC state, recent transactions)
+ */
+export const GetClientDashboardResponse = zod.object({
+  walletBalance: zod.string(),
+  currency: zod.string(),
+  kycStatus: zod.enum(["none", "pending", "approved", "rejected"]),
+  tradingAccountCount: zod.number(),
+  recentTransactions: zod.array(
+    zod.object({
+      id: zod.number(),
+      type: zod.enum([
+        "deposit_wire",
+        "deposit_crypto",
+        "withdrawal",
+        "transfer_to_mt5",
+        "transfer_from_mt5",
+        "adjustment",
+      ]),
+      status: zod.enum(["pending", "approved", "rejected", "failed"]),
+      amount: zod.string(),
+      currency: zod.string(),
+      reference: zod.string().nullish(),
+      cryptoCoin: zod.string().nullish(),
+      cryptoTxid: zod.string().nullish(),
+      bankAccountId: zod.number().nullish(),
+      tradingAccountId: zod.number().nullish(),
+      clientNote: zod.string().nullish(),
+      adminNotes: zod.string().nullish(),
+      createdAt: zod.date(),
+      decidedAt: zod.date().nullish(),
+    }),
+  ),
+});
+
+/**
+ * @summary Get the client's wallet
+ */
+export const GetClientWalletResponse = zod.object({
+  id: zod.number(),
+  currency: zod.string(),
+  balance: zod.string(),
+});
+
+/**
+ * @summary List the client's transactions
+ */
+export const ListClientTransactionsQueryParams = zod.object({
+  type: zod
+    .enum([
+      "deposit_wire",
+      "deposit_crypto",
+      "withdrawal",
+      "transfer_to_mt5",
+      "transfer_from_mt5",
+      "adjustment",
+    ])
+    .optional(),
+  status: zod.enum(["pending", "approved", "rejected", "failed"]).optional(),
+});
+
+export const ListClientTransactionsResponse = zod.object({
+  transactions: zod.array(
+    zod.object({
+      id: zod.number(),
+      type: zod.enum([
+        "deposit_wire",
+        "deposit_crypto",
+        "withdrawal",
+        "transfer_to_mt5",
+        "transfer_from_mt5",
+        "adjustment",
+      ]),
+      status: zod.enum(["pending", "approved", "rejected", "failed"]),
+      amount: zod.string(),
+      currency: zod.string(),
+      reference: zod.string().nullish(),
+      cryptoCoin: zod.string().nullish(),
+      cryptoTxid: zod.string().nullish(),
+      bankAccountId: zod.number().nullish(),
+      tradingAccountId: zod.number().nullish(),
+      clientNote: zod.string().nullish(),
+      adminNotes: zod.string().nullish(),
+      createdAt: zod.date(),
+      decidedAt: zod.date().nullish(),
+    }),
+  ),
+});
+
+/**
+ * @summary Get available deposit methods (wire details, crypto addresses)
+ */
+export const GetClientDepositMethodsResponse = zod.object({
+  wire: zod
+    .union([
+      zod.object({
+        beneficiaryName: zod.string(),
+        bankName: zod.string(),
+        accountNumber: zod.string().nullish(),
+        iban: zod.string().nullish(),
+        swift: zod.string().nullish(),
+        bankAddress: zod.string().nullish(),
+        referenceInstructions: zod.string().nullish(),
+      }),
+      zod.null(),
+    ])
+    .optional(),
+  cryptoAddresses: zod.array(
+    zod.object({
+      coin: zod.string(),
+      network: zod.string(),
+      address: zod.string(),
+    }),
+  ),
+});
+
+/**
+ * @summary Submit a deposit notice (wire or crypto), pending admin approval
+ */
+export const CreateClientDepositBody = zod.object({
+  method: zod.enum(["wire", "crypto"]),
+  amount: zod.string(),
+  reference: zod.string().nullish(),
+  cryptoCoin: zod.string().nullish(),
+  cryptoTxid: zod.string().nullish(),
+  note: zod.string().nullish(),
+});
+
+/**
+ * @summary List the client's saved bank accounts
+ */
+export const ListClientBankAccountsResponse = zod.object({
+  bankAccounts: zod.array(
+    zod.object({
+      id: zod.number(),
+      beneficiaryName: zod.string(),
+      bankName: zod.string(),
+      iban: zod.string().nullish(),
+      accountNumber: zod.string().nullish(),
+      swift: zod.string().nullish(),
+      currency: zod.string(),
+      createdAt: zod.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Save a bank account for withdrawals
+ */
+export const CreateClientBankAccountBody = zod.object({
+  beneficiaryName: zod.string(),
+  bankName: zod.string(),
+  iban: zod.string().nullish(),
+  accountNumber: zod.string().nullish(),
+  swift: zod.string().nullish(),
+  currency: zod.string().nullish(),
+});
+
+/**
+ * @summary Remove a saved bank account
+ */
+export const DeleteClientBankAccountParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DeleteClientBankAccountResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
+ * @summary Request a withdrawal to a saved bank account (funds held)
+ */
+export const CreateClientWithdrawalBody = zod.object({
+  bankAccountId: zod.number(),
+  amount: zod.string(),
+});
+
+/**
+ * @summary Transfer between wallet and a trading account
+ */
+export const CreateClientTransferBody = zod.object({
+  direction: zod.enum(["to_mt5", "from_mt5"]),
+  tradingAccountId: zod.number(),
+  amount: zod.string(),
+});
+
+/**
+ * @summary List active account types available to open
+ */
+export const ListClientAccountTypesResponse = zod.object({
+  accountTypes: zod.array(
+    zod.object({
+      id: zod.number(),
+      name: zod.string(),
+      description: zod.string().nullish(),
+      mt5Group: zod.string(),
+      currency: zod.string(),
+      minDeposit: zod.string(),
+      leverages: zod.array(zod.number()),
+      isActive: zod.boolean(),
+      sortOrder: zod.number(),
+    }),
+  ),
+});
+
+/**
+ * @summary List transactions across all clients
+ */
+export const ListBrokerTransactionsQueryParams = zod.object({
+  type: zod
+    .enum([
+      "deposit_wire",
+      "deposit_crypto",
+      "withdrawal",
+      "transfer_to_mt5",
+      "transfer_from_mt5",
+      "adjustment",
+    ])
+    .optional(),
+  status: zod.enum(["pending", "approved", "rejected", "failed"]).optional(),
+});
+
+export const ListBrokerTransactionsResponse = zod.object({
+  transactions: zod.array(
+    zod.object({
+      id: zod.number(),
+      clientId: zod.number(),
+      clientEmail: zod.string(),
+      clientName: zod.string(),
+      type: zod.enum([
+        "deposit_wire",
+        "deposit_crypto",
+        "withdrawal",
+        "transfer_to_mt5",
+        "transfer_from_mt5",
+        "adjustment",
+      ]),
+      status: zod.enum(["pending", "approved", "rejected", "failed"]),
+      amount: zod.string(),
+      currency: zod.string(),
+      reference: zod.string().nullish(),
+      cryptoCoin: zod.string().nullish(),
+      cryptoTxid: zod.string().nullish(),
+      bankAccount: zod
+        .union([
+          zod.object({
+            id: zod.number(),
+            beneficiaryName: zod.string(),
+            bankName: zod.string(),
+            iban: zod.string().nullish(),
+            accountNumber: zod.string().nullish(),
+            swift: zod.string().nullish(),
+            currency: zod.string(),
+            createdAt: zod.date(),
+          }),
+          zod.null(),
+        ])
+        .optional(),
+      tradingAccountId: zod.number().nullish(),
+      mt5Ticket: zod.string().nullish(),
+      clientNote: zod.string().nullish(),
+      adminNotes: zod.string().nullish(),
+      decidedAt: zod.date().nullish(),
+      createdAt: zod.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Approve or reject a pending deposit/withdrawal
+ */
+export const DecideBrokerTransactionParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DecideBrokerTransactionBody = zod.object({
+  decision: zod.enum(["approved", "rejected"]),
+  adminNotes: zod.string().nullish(),
+});
+
+export const DecideBrokerTransactionResponse = zod.object({
+  success: zod.boolean(),
+  transaction: zod.object({
+    id: zod.number(),
+    clientId: zod.number(),
+    clientEmail: zod.string(),
+    clientName: zod.string(),
+    type: zod.enum([
+      "deposit_wire",
+      "deposit_crypto",
+      "withdrawal",
+      "transfer_to_mt5",
+      "transfer_from_mt5",
+      "adjustment",
+    ]),
+    status: zod.enum(["pending", "approved", "rejected", "failed"]),
+    amount: zod.string(),
+    currency: zod.string(),
+    reference: zod.string().nullish(),
+    cryptoCoin: zod.string().nullish(),
+    cryptoTxid: zod.string().nullish(),
+    bankAccount: zod
+      .union([
+        zod.object({
+          id: zod.number(),
+          beneficiaryName: zod.string(),
+          bankName: zod.string(),
+          iban: zod.string().nullish(),
+          accountNumber: zod.string().nullish(),
+          swift: zod.string().nullish(),
+          currency: zod.string(),
+          createdAt: zod.date(),
+        }),
+        zod.null(),
+      ])
+      .optional(),
+    tradingAccountId: zod.number().nullish(),
+    mt5Ticket: zod.string().nullish(),
+    clientNote: zod.string().nullish(),
+    adminNotes: zod.string().nullish(),
+    decidedAt: zod.date().nullish(),
+    createdAt: zod.date(),
+  }),
+});
+
+/**
+ * @summary Get the wire transfer details shown to depositing clients
+ */
+export const GetBrokerWireSettingsResponse = zod.object({
+  wire: zod
+    .union([
+      zod.object({
+        beneficiaryName: zod.string(),
+        bankName: zod.string(),
+        accountNumber: zod.string().nullish(),
+        iban: zod.string().nullish(),
+        swift: zod.string().nullish(),
+        bankAddress: zod.string().nullish(),
+        referenceInstructions: zod.string().nullish(),
+      }),
+      zod.null(),
+    ])
+    .optional(),
+});
+
+/**
+ * @summary Update the wire transfer details
+ */
+export const UpdateBrokerWireSettingsBody = zod.object({
+  wire: zod.object({
+    beneficiaryName: zod.string(),
+    bankName: zod.string(),
+    accountNumber: zod.string().nullish(),
+    iban: zod.string().nullish(),
+    swift: zod.string().nullish(),
+    bankAddress: zod.string().nullish(),
+    referenceInstructions: zod.string().nullish(),
+  }),
+});
+
+export const UpdateBrokerWireSettingsResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
+ * @summary Get the static crypto deposit addresses
+ */
+export const GetBrokerCryptoAddressesResponse = zod.object({
+  cryptoAddresses: zod.array(
+    zod.object({
+      coin: zod.string(),
+      network: zod.string(),
+      address: zod.string(),
+    }),
+  ),
+});
+
+/**
+ * @summary Update the static crypto deposit addresses
+ */
+export const UpdateBrokerCryptoAddressesBody = zod.object({
+  cryptoAddresses: zod.array(
+    zod.object({
+      coin: zod.string(),
+      network: zod.string(),
+      address: zod.string(),
+    }),
+  ),
+});
+
+export const UpdateBrokerCryptoAddressesResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
+ * @summary List all account types (including inactive)
+ */
+export const ListBrokerAccountTypesResponse = zod.object({
+  accountTypes: zod.array(
+    zod.object({
+      id: zod.number(),
+      name: zod.string(),
+      description: zod.string().nullish(),
+      mt5Group: zod.string(),
+      currency: zod.string(),
+      minDeposit: zod.string(),
+      leverages: zod.array(zod.number()),
+      isActive: zod.boolean(),
+      sortOrder: zod.number(),
+    }),
+  ),
+});
+
+/**
+ * @summary Create an account type
+ */
+export const CreateBrokerAccountTypeBody = zod.object({
+  name: zod.string(),
+  description: zod.string().nullish(),
+  mt5Group: zod.string(),
+  currency: zod.string().nullish(),
+  minDeposit: zod.string().nullish(),
+  leverages: zod.array(zod.number()),
+  isActive: zod.boolean().nullish(),
+  sortOrder: zod.number().nullish(),
+});
+
+/**
+ * @summary Update an account type
+ */
+export const UpdateBrokerAccountTypeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateBrokerAccountTypeBody = zod.object({
+  name: zod.string().nullish(),
+  description: zod.string().nullish(),
+  mt5Group: zod.string().nullish(),
+  minDeposit: zod.string().nullish(),
+  leverages: zod.array(zod.number()).nullish(),
+  isActive: zod.boolean().nullish(),
+  sortOrder: zod.number().nullish(),
+});
+
+export const UpdateBrokerAccountTypeResponse = zod.object({
+  success: zod.boolean(),
+  accountType: zod.object({
+    id: zod.number(),
+    name: zod.string(),
+    description: zod.string().nullish(),
+    mt5Group: zod.string(),
+    currency: zod.string(),
+    minDeposit: zod.string(),
+    leverages: zod.array(zod.number()),
+    isActive: zod.boolean(),
+    sortOrder: zod.number(),
+  }),
+});
+
+/**
  * @summary List trading clients
  */
 export const ListBrokerClientsQueryParams = zod.object({

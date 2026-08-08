@@ -1229,6 +1229,412 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  # Trading-client wallet & funding
+  /client/dashboard:
+    get:
+      operationId: getClientDashboard
+      tags: [client]
+      summary: Client dashboard (balance, KYC state, recent transactions)
+      responses:
+        "200":
+          description: Dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientDashboardResponse"
+
+  /client/wallet:
+    get:
+      operationId: getClientWallet
+      tags: [client]
+      summary: Get the client's wallet
+      responses:
+        "200":
+          description: Wallet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientWalletResponse"
+
+  /client/transactions:
+    get:
+      operationId: listClientTransactions
+      tags: [client]
+      summary: List the client's transactions
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [deposit_wire, deposit_crypto, withdrawal, transfer_to_mt5, transfer_from_mt5, adjustment]
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [pending, approved, rejected, failed]
+      responses:
+        "200":
+          description: Transactions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientTransactionListResponse"
+
+  /client/deposit/methods:
+    get:
+      operationId: getClientDepositMethods
+      tags: [client]
+      summary: Get available deposit methods (wire details, crypto addresses)
+      responses:
+        "200":
+          description: Deposit methods
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientDepositMethodsResponse"
+
+  /client/deposits:
+    post:
+      operationId: createClientDeposit
+      tags: [client]
+      summary: Submit a deposit notice (wire or crypto), pending admin approval
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientDepositRequest"
+      responses:
+        "201":
+          description: Deposit submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateClientDepositResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /client/bank-accounts:
+    get:
+      operationId: listClientBankAccounts
+      tags: [client]
+      summary: List the client's saved bank accounts
+      responses:
+        "200":
+          description: Bank accounts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientBankAccountListResponse"
+    post:
+      operationId: createClientBankAccount
+      tags: [client]
+      summary: Save a bank account for withdrawals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientBankAccountRequest"
+      responses:
+        "201":
+          description: Bank account saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateClientBankAccountResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /client/bank-accounts/{id}:
+    delete:
+      operationId: deleteClientBankAccount
+      tags: [client]
+      summary: Remove a saved bank account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteClientBankAccountResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /client/withdrawals:
+    post:
+      operationId: createClientWithdrawal
+      tags: [client]
+      summary: Request a withdrawal to a saved bank account (funds held)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientWithdrawalRequest"
+      responses:
+        "201":
+          description: Withdrawal requested
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateClientWithdrawalResponse"
+        "400":
+          description: Bad request (e.g. insufficient balance)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /client/transfers:
+    post:
+      operationId: createClientTransfer
+      tags: [client]
+      summary: Transfer between wallet and a trading account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientTransferRequest"
+      responses:
+        "201":
+          description: Transfer executed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateClientTransferResponse"
+        "400":
+          description: Bad request (e.g. insufficient balance)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: MT5 operation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /client/account-types:
+    get:
+      operationId: listClientAccountTypes
+      tags: [client]
+      summary: List active account types available to open
+      responses:
+        "200":
+          description: Account types
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientAccountTypesResponse"
+
+  # Broker admin — transactions & settings
+  /admin/broker/transactions:
+    get:
+      operationId: listBrokerTransactions
+      tags: [broker-admin]
+      summary: List transactions across all clients
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [deposit_wire, deposit_crypto, withdrawal, transfer_to_mt5, transfer_from_mt5, adjustment]
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [pending, approved, rejected, failed]
+      responses:
+        "200":
+          description: Transactions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrokerTransactionListResponse"
+
+  /admin/broker/transactions/{id}/decision:
+    post:
+      operationId: decideBrokerTransaction
+      tags: [broker-admin]
+      summary: Approve or reject a pending deposit/withdrawal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BrokerTransactionDecisionRequest"
+      responses:
+        "200":
+          description: Decision applied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrokerTransactionDecisionResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Already decided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/broker/settings/wire:
+    get:
+      operationId: getBrokerWireSettings
+      tags: [broker-admin]
+      summary: Get the wire transfer details shown to depositing clients
+      responses:
+        "200":
+          description: Wire settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrokerWireSettingsResponse"
+    put:
+      operationId: updateBrokerWireSettings
+      tags: [broker-admin]
+      summary: Update the wire transfer details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBrokerWireSettingsRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateBrokerWireSettingsResponse"
+
+  /admin/broker/settings/crypto-addresses:
+    get:
+      operationId: getBrokerCryptoAddresses
+      tags: [broker-admin]
+      summary: Get the static crypto deposit addresses
+      responses:
+        "200":
+          description: Crypto addresses
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrokerCryptoAddressesResponse"
+    put:
+      operationId: updateBrokerCryptoAddresses
+      tags: [broker-admin]
+      summary: Update the static crypto deposit addresses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBrokerCryptoAddressesRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateBrokerCryptoAddressesResponse"
+
+  /admin/broker/account-types:
+    get:
+      operationId: listBrokerAccountTypes
+      tags: [broker-admin]
+      summary: List all account types (including inactive)
+      responses:
+        "200":
+          description: Account types
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrokerAccountTypesResponse"
+    post:
+      operationId: createBrokerAccountType
+      tags: [broker-admin]
+      summary: Create an account type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBrokerAccountTypeRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateBrokerAccountTypeResponse"
+
+  /admin/broker/account-types/{id}:
+    patch:
+      operationId: updateBrokerAccountType
+      tags: [broker-admin]
+      summary: Update an account type
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBrokerAccountTypeRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateBrokerAccountTypeResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   # Broker admin — clients & KYC
   /admin/broker/clients:
     get:
@@ -1525,6 +1931,612 @@ components:
       required:
         - success
         - document
+
+    ClientTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [deposit_wire, deposit_crypto, withdrawal, transfer_to_mt5, transfer_from_mt5, adjustment]
+        status:
+          type: string
+          enum: [pending, approved, rejected, failed]
+        amount:
+          type: string
+        currency:
+          type: string
+        reference:
+          type: string
+          nullable: true
+        cryptoCoin:
+          type: string
+          nullable: true
+        cryptoTxid:
+          type: string
+          nullable: true
+        bankAccountId:
+          type: integer
+          nullable: true
+        tradingAccountId:
+          type: integer
+          nullable: true
+        clientNote:
+          type: string
+          nullable: true
+        adminNotes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        decidedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - type
+        - status
+        - amount
+        - currency
+        - createdAt
+
+    ClientDashboardResponse:
+      type: object
+      properties:
+        walletBalance:
+          type: string
+        currency:
+          type: string
+        kycStatus:
+          type: string
+          enum: [none, pending, approved, rejected]
+        tradingAccountCount:
+          type: integer
+        recentTransactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientTransaction"
+      required:
+        - walletBalance
+        - currency
+        - kycStatus
+        - tradingAccountCount
+        - recentTransactions
+
+    ClientWalletResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        currency:
+          type: string
+        balance:
+          type: string
+      required:
+        - id
+        - currency
+        - balance
+
+    ClientTransactionListResponse:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientTransaction"
+      required:
+        - transactions
+
+    BrokerWireDetails:
+      type: object
+      properties:
+        beneficiaryName:
+          type: string
+        bankName:
+          type: string
+        accountNumber:
+          type: string
+          nullable: true
+        iban:
+          type: string
+          nullable: true
+        swift:
+          type: string
+          nullable: true
+        bankAddress:
+          type: string
+          nullable: true
+        referenceInstructions:
+          type: string
+          nullable: true
+      required:
+        - beneficiaryName
+        - bankName
+
+    BrokerCryptoAddress:
+      type: object
+      properties:
+        coin:
+          type: string
+        network:
+          type: string
+        address:
+          type: string
+      required:
+        - coin
+        - network
+        - address
+
+    ClientDepositMethodsResponse:
+      type: object
+      properties:
+        wire:
+          oneOf:
+            - $ref: "#/components/schemas/BrokerWireDetails"
+            - type: "null"
+        cryptoAddresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrokerCryptoAddress"
+      required:
+        - cryptoAddresses
+
+    CreateClientDepositRequest:
+      type: object
+      properties:
+        method:
+          type: string
+          enum: [wire, crypto]
+        amount:
+          type: string
+        reference:
+          type: string
+          nullable: true
+        cryptoCoin:
+          type: string
+          nullable: true
+        cryptoTxid:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+      required:
+        - method
+        - amount
+
+    CreateClientDepositResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        transaction:
+          $ref: "#/components/schemas/ClientTransaction"
+      required:
+        - success
+        - transaction
+
+    ClientBankAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+        beneficiaryName:
+          type: string
+        bankName:
+          type: string
+        iban:
+          type: string
+          nullable: true
+        accountNumber:
+          type: string
+          nullable: true
+        swift:
+          type: string
+          nullable: true
+        currency:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - beneficiaryName
+        - bankName
+        - currency
+        - createdAt
+
+    ClientBankAccountListResponse:
+      type: object
+      properties:
+        bankAccounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientBankAccount"
+      required:
+        - bankAccounts
+
+    CreateClientBankAccountRequest:
+      type: object
+      properties:
+        beneficiaryName:
+          type: string
+        bankName:
+          type: string
+        iban:
+          type: string
+          nullable: true
+        accountNumber:
+          type: string
+          nullable: true
+        swift:
+          type: string
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+      required:
+        - beneficiaryName
+        - bankName
+
+    CreateClientBankAccountResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        bankAccount:
+          $ref: "#/components/schemas/ClientBankAccount"
+      required:
+        - success
+        - bankAccount
+
+    DeleteClientBankAccountResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required:
+        - success
+
+    CreateClientWithdrawalRequest:
+      type: object
+      properties:
+        bankAccountId:
+          type: integer
+        amount:
+          type: string
+      required:
+        - bankAccountId
+        - amount
+
+    CreateClientWithdrawalResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        transaction:
+          $ref: "#/components/schemas/ClientTransaction"
+        walletBalance:
+          type: string
+      required:
+        - success
+        - transaction
+        - walletBalance
+
+    CreateClientTransferRequest:
+      type: object
+      properties:
+        direction:
+          type: string
+          enum: [to_mt5, from_mt5]
+        tradingAccountId:
+          type: integer
+        amount:
+          type: string
+      required:
+        - direction
+        - tradingAccountId
+        - amount
+
+    CreateClientTransferResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        transaction:
+          $ref: "#/components/schemas/ClientTransaction"
+        walletBalance:
+          type: string
+      required:
+        - success
+        - transaction
+        - walletBalance
+
+    BrokerAccountType:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        mt5Group:
+          type: string
+        currency:
+          type: string
+        minDeposit:
+          type: string
+        leverages:
+          type: array
+          items:
+            type: integer
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+      required:
+        - id
+        - name
+        - mt5Group
+        - currency
+        - minDeposit
+        - leverages
+        - isActive
+        - sortOrder
+
+    ClientAccountTypesResponse:
+      type: object
+      properties:
+        accountTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrokerAccountType"
+      required:
+        - accountTypes
+
+    BrokerAdminTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        clientId:
+          type: integer
+        clientEmail:
+          type: string
+        clientName:
+          type: string
+        type:
+          type: string
+          enum: [deposit_wire, deposit_crypto, withdrawal, transfer_to_mt5, transfer_from_mt5, adjustment]
+        status:
+          type: string
+          enum: [pending, approved, rejected, failed]
+        amount:
+          type: string
+        currency:
+          type: string
+        reference:
+          type: string
+          nullable: true
+        cryptoCoin:
+          type: string
+          nullable: true
+        cryptoTxid:
+          type: string
+          nullable: true
+        bankAccount:
+          oneOf:
+            - $ref: "#/components/schemas/ClientBankAccount"
+            - type: "null"
+        tradingAccountId:
+          type: integer
+          nullable: true
+        mt5Ticket:
+          type: string
+          nullable: true
+        clientNote:
+          type: string
+          nullable: true
+        adminNotes:
+          type: string
+          nullable: true
+        decidedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - clientId
+        - clientEmail
+        - clientName
+        - type
+        - status
+        - amount
+        - currency
+        - createdAt
+
+    BrokerTransactionListResponse:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrokerAdminTransaction"
+      required:
+        - transactions
+
+    BrokerTransactionDecisionRequest:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum: [approved, rejected]
+        adminNotes:
+          type: string
+          nullable: true
+      required:
+        - decision
+
+    BrokerTransactionDecisionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        transaction:
+          $ref: "#/components/schemas/BrokerAdminTransaction"
+      required:
+        - success
+        - transaction
+
+    BrokerWireSettingsResponse:
+      type: object
+      properties:
+        wire:
+          oneOf:
+            - $ref: "#/components/schemas/BrokerWireDetails"
+            - type: "null"
+
+    UpdateBrokerWireSettingsRequest:
+      type: object
+      properties:
+        wire:
+          $ref: "#/components/schemas/BrokerWireDetails"
+      required:
+        - wire
+
+    UpdateBrokerWireSettingsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required:
+        - success
+
+    BrokerCryptoAddressesResponse:
+      type: object
+      properties:
+        cryptoAddresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrokerCryptoAddress"
+      required:
+        - cryptoAddresses
+
+    UpdateBrokerCryptoAddressesRequest:
+      type: object
+      properties:
+        cryptoAddresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrokerCryptoAddress"
+      required:
+        - cryptoAddresses
+
+    UpdateBrokerCryptoAddressesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required:
+        - success
+
+    BrokerAccountTypesResponse:
+      type: object
+      properties:
+        accountTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrokerAccountType"
+      required:
+        - accountTypes
+
+    CreateBrokerAccountTypeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        mt5Group:
+          type: string
+        currency:
+          type: string
+          nullable: true
+        minDeposit:
+          type: string
+          nullable: true
+        leverages:
+          type: array
+          items:
+            type: integer
+        isActive:
+          type: boolean
+          nullable: true
+        sortOrder:
+          type: integer
+          nullable: true
+      required:
+        - name
+        - mt5Group
+        - leverages
+
+    CreateBrokerAccountTypeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        accountType:
+          $ref: "#/components/schemas/BrokerAccountType"
+      required:
+        - success
+        - accountType
+
+    UpdateBrokerAccountTypeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        mt5Group:
+          type: string
+          nullable: true
+        minDeposit:
+          type: string
+          nullable: true
+        leverages:
+          type: array
+          nullable: true
+          items:
+            type: integer
+        isActive:
+          type: boolean
+          nullable: true
+        sortOrder:
+          type: integer
+          nullable: true
+
+    UpdateBrokerAccountTypeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        accountType:
+          $ref: "#/components/schemas/BrokerAccountType"
+      required:
+        - success
+        - accountType
 
     BrokerClientSummary:
       type: object

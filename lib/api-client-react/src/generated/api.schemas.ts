@@ -128,6 +128,320 @@ export interface ClientKycUploadResponse {
   document: ClientKycDocument;
 }
 
+export type ClientTransactionType =
+  (typeof ClientTransactionType)[keyof typeof ClientTransactionType];
+
+export const ClientTransactionType = {
+  deposit_wire: "deposit_wire",
+  deposit_crypto: "deposit_crypto",
+  withdrawal: "withdrawal",
+  transfer_to_mt5: "transfer_to_mt5",
+  transfer_from_mt5: "transfer_from_mt5",
+  adjustment: "adjustment",
+} as const;
+
+export type ClientTransactionStatus =
+  (typeof ClientTransactionStatus)[keyof typeof ClientTransactionStatus];
+
+export const ClientTransactionStatus = {
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+  failed: "failed",
+} as const;
+
+export interface ClientTransaction {
+  id: number;
+  type: ClientTransactionType;
+  status: ClientTransactionStatus;
+  amount: string;
+  currency: string;
+  reference?: string | null;
+  cryptoCoin?: string | null;
+  cryptoTxid?: string | null;
+  bankAccountId?: number | null;
+  tradingAccountId?: number | null;
+  clientNote?: string | null;
+  adminNotes?: string | null;
+  createdAt: string;
+  decidedAt?: string | null;
+}
+
+export type ClientDashboardResponseKycStatus =
+  (typeof ClientDashboardResponseKycStatus)[keyof typeof ClientDashboardResponseKycStatus];
+
+export const ClientDashboardResponseKycStatus = {
+  none: "none",
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+} as const;
+
+export interface ClientDashboardResponse {
+  walletBalance: string;
+  currency: string;
+  kycStatus: ClientDashboardResponseKycStatus;
+  tradingAccountCount: number;
+  recentTransactions: ClientTransaction[];
+}
+
+export interface ClientWalletResponse {
+  id: number;
+  currency: string;
+  balance: string;
+}
+
+export interface ClientTransactionListResponse {
+  transactions: ClientTransaction[];
+}
+
+export interface BrokerWireDetails {
+  beneficiaryName: string;
+  bankName: string;
+  accountNumber?: string | null;
+  iban?: string | null;
+  swift?: string | null;
+  bankAddress?: string | null;
+  referenceInstructions?: string | null;
+}
+
+export interface BrokerCryptoAddress {
+  coin: string;
+  network: string;
+  address: string;
+}
+
+export interface ClientDepositMethodsResponse {
+  wire?: BrokerWireDetails | null;
+  cryptoAddresses: BrokerCryptoAddress[];
+}
+
+export type CreateClientDepositRequestMethod =
+  (typeof CreateClientDepositRequestMethod)[keyof typeof CreateClientDepositRequestMethod];
+
+export const CreateClientDepositRequestMethod = {
+  wire: "wire",
+  crypto: "crypto",
+} as const;
+
+export interface CreateClientDepositRequest {
+  method: CreateClientDepositRequestMethod;
+  amount: string;
+  reference?: string | null;
+  cryptoCoin?: string | null;
+  cryptoTxid?: string | null;
+  note?: string | null;
+}
+
+export interface CreateClientDepositResponse {
+  success: boolean;
+  transaction: ClientTransaction;
+}
+
+export interface ClientBankAccount {
+  id: number;
+  beneficiaryName: string;
+  bankName: string;
+  iban?: string | null;
+  accountNumber?: string | null;
+  swift?: string | null;
+  currency: string;
+  createdAt: string;
+}
+
+export interface ClientBankAccountListResponse {
+  bankAccounts: ClientBankAccount[];
+}
+
+export interface CreateClientBankAccountRequest {
+  beneficiaryName: string;
+  bankName: string;
+  iban?: string | null;
+  accountNumber?: string | null;
+  swift?: string | null;
+  currency?: string | null;
+}
+
+export interface CreateClientBankAccountResponse {
+  success: boolean;
+  bankAccount: ClientBankAccount;
+}
+
+export interface DeleteClientBankAccountResponse {
+  success: boolean;
+}
+
+export interface CreateClientWithdrawalRequest {
+  bankAccountId: number;
+  amount: string;
+}
+
+export interface CreateClientWithdrawalResponse {
+  success: boolean;
+  transaction: ClientTransaction;
+  walletBalance: string;
+}
+
+export type CreateClientTransferRequestDirection =
+  (typeof CreateClientTransferRequestDirection)[keyof typeof CreateClientTransferRequestDirection];
+
+export const CreateClientTransferRequestDirection = {
+  to_mt5: "to_mt5",
+  from_mt5: "from_mt5",
+} as const;
+
+export interface CreateClientTransferRequest {
+  direction: CreateClientTransferRequestDirection;
+  tradingAccountId: number;
+  amount: string;
+}
+
+export interface CreateClientTransferResponse {
+  success: boolean;
+  transaction: ClientTransaction;
+  walletBalance: string;
+}
+
+export interface BrokerAccountType {
+  id: number;
+  name: string;
+  description?: string | null;
+  mt5Group: string;
+  currency: string;
+  minDeposit: string;
+  leverages: number[];
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export interface ClientAccountTypesResponse {
+  accountTypes: BrokerAccountType[];
+}
+
+export type BrokerAdminTransactionType =
+  (typeof BrokerAdminTransactionType)[keyof typeof BrokerAdminTransactionType];
+
+export const BrokerAdminTransactionType = {
+  deposit_wire: "deposit_wire",
+  deposit_crypto: "deposit_crypto",
+  withdrawal: "withdrawal",
+  transfer_to_mt5: "transfer_to_mt5",
+  transfer_from_mt5: "transfer_from_mt5",
+  adjustment: "adjustment",
+} as const;
+
+export type BrokerAdminTransactionStatus =
+  (typeof BrokerAdminTransactionStatus)[keyof typeof BrokerAdminTransactionStatus];
+
+export const BrokerAdminTransactionStatus = {
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+  failed: "failed",
+} as const;
+
+export interface BrokerAdminTransaction {
+  id: number;
+  clientId: number;
+  clientEmail: string;
+  clientName: string;
+  type: BrokerAdminTransactionType;
+  status: BrokerAdminTransactionStatus;
+  amount: string;
+  currency: string;
+  reference?: string | null;
+  cryptoCoin?: string | null;
+  cryptoTxid?: string | null;
+  bankAccount?: ClientBankAccount | null;
+  tradingAccountId?: number | null;
+  mt5Ticket?: string | null;
+  clientNote?: string | null;
+  adminNotes?: string | null;
+  decidedAt?: string | null;
+  createdAt: string;
+}
+
+export interface BrokerTransactionListResponse {
+  transactions: BrokerAdminTransaction[];
+}
+
+export type BrokerTransactionDecisionRequestDecision =
+  (typeof BrokerTransactionDecisionRequestDecision)[keyof typeof BrokerTransactionDecisionRequestDecision];
+
+export const BrokerTransactionDecisionRequestDecision = {
+  approved: "approved",
+  rejected: "rejected",
+} as const;
+
+export interface BrokerTransactionDecisionRequest {
+  decision: BrokerTransactionDecisionRequestDecision;
+  adminNotes?: string | null;
+}
+
+export interface BrokerTransactionDecisionResponse {
+  success: boolean;
+  transaction: BrokerAdminTransaction;
+}
+
+export interface BrokerWireSettingsResponse {
+  wire?: BrokerWireDetails | null;
+}
+
+export interface UpdateBrokerWireSettingsRequest {
+  wire: BrokerWireDetails;
+}
+
+export interface UpdateBrokerWireSettingsResponse {
+  success: boolean;
+}
+
+export interface BrokerCryptoAddressesResponse {
+  cryptoAddresses: BrokerCryptoAddress[];
+}
+
+export interface UpdateBrokerCryptoAddressesRequest {
+  cryptoAddresses: BrokerCryptoAddress[];
+}
+
+export interface UpdateBrokerCryptoAddressesResponse {
+  success: boolean;
+}
+
+export interface BrokerAccountTypesResponse {
+  accountTypes: BrokerAccountType[];
+}
+
+export interface CreateBrokerAccountTypeRequest {
+  name: string;
+  description?: string | null;
+  mt5Group: string;
+  currency?: string | null;
+  minDeposit?: string | null;
+  leverages: number[];
+  isActive?: boolean | null;
+  sortOrder?: number | null;
+}
+
+export interface CreateBrokerAccountTypeResponse {
+  success: boolean;
+  accountType: BrokerAccountType;
+}
+
+export interface UpdateBrokerAccountTypeRequest {
+  name?: string | null;
+  description?: string | null;
+  mt5Group?: string | null;
+  minDeposit?: string | null;
+  leverages?: number[] | null;
+  isActive?: boolean | null;
+  sortOrder?: number | null;
+}
+
+export interface UpdateBrokerAccountTypeResponse {
+  success: boolean;
+  accountType: BrokerAccountType;
+}
+
 export type BrokerClientSummaryStatus =
   (typeof BrokerClientSummaryStatus)[keyof typeof BrokerClientSummaryStatus];
 
@@ -1079,6 +1393,60 @@ export type UploadClientKycDocumentBody = {
   docType: UploadClientKycDocumentBodyDocType;
   file: Blob;
 };
+
+export type ListClientTransactionsParams = {
+  type?: ListClientTransactionsType;
+  status?: ListClientTransactionsStatus;
+};
+
+export type ListClientTransactionsType =
+  (typeof ListClientTransactionsType)[keyof typeof ListClientTransactionsType];
+
+export const ListClientTransactionsType = {
+  deposit_wire: "deposit_wire",
+  deposit_crypto: "deposit_crypto",
+  withdrawal: "withdrawal",
+  transfer_to_mt5: "transfer_to_mt5",
+  transfer_from_mt5: "transfer_from_mt5",
+  adjustment: "adjustment",
+} as const;
+
+export type ListClientTransactionsStatus =
+  (typeof ListClientTransactionsStatus)[keyof typeof ListClientTransactionsStatus];
+
+export const ListClientTransactionsStatus = {
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+  failed: "failed",
+} as const;
+
+export type ListBrokerTransactionsParams = {
+  type?: ListBrokerTransactionsType;
+  status?: ListBrokerTransactionsStatus;
+};
+
+export type ListBrokerTransactionsType =
+  (typeof ListBrokerTransactionsType)[keyof typeof ListBrokerTransactionsType];
+
+export const ListBrokerTransactionsType = {
+  deposit_wire: "deposit_wire",
+  deposit_crypto: "deposit_crypto",
+  withdrawal: "withdrawal",
+  transfer_to_mt5: "transfer_to_mt5",
+  transfer_from_mt5: "transfer_from_mt5",
+  adjustment: "adjustment",
+} as const;
+
+export type ListBrokerTransactionsStatus =
+  (typeof ListBrokerTransactionsStatus)[keyof typeof ListBrokerTransactionsStatus];
+
+export const ListBrokerTransactionsStatus = {
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+  failed: "failed",
+} as const;
 
 export type ListBrokerClientsParams = {
   kycStatus?: ListBrokerClientsKycStatus;
