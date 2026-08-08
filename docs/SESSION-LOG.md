@@ -72,6 +72,35 @@ MT5 trading accounts, broker admin with approval queues; MT5 through a mock
 adapter until the real Manager API is supplied; wire + crypto-deposit-only
 rails; Resend email).
 
+### 1.2 — M2: MT5 adapter package (`@workspace/mt5`)
+
+**Problem.** Trading-account provisioning and balance operations must work now,
+but the real MT5 Manager API credentials don't exist yet. Callers must not
+change when they arrive.
+
+**Change.** New workspace package `lib/integrations/mt5` (the
+`lib/integrations/*` glob already existed): `Mt5Provider` interface
+(createAccount / deposit / withdraw / getAccountInfo / getAccountsInfo /
+changeLeverage, money as decimal strings), a DB-backed `MockMt5Provider`
+persisting simulated accounts in `broker_mt5_mock_accounts` (state survives
+restarts; equity == balance, no positions simulated), a `ManagerMt5Provider`
+stub that throws `Mt5NotConfiguredError`, and `getMt5Provider()` selecting via
+`MT5_PROVIDER` env (default `mock`). Integer-cents string math in
+`src/money.ts`. Registered in root + api-server tsconfig references and
+api-server deps.
+
+**Expected result.** All MT5 calls flow through one interface; swapping in the
+real Manager API later = implement `managerProvider.ts` + set
+`MT5_PROVIDER=manager`, no caller changes.
+
+**Verified by.** MEASURED: tsx smoke test against local Postgres — created
+account got sequential login 100001, deposit 150.25 → balance "150.25",
+withdraw 50.25 → "100.00", overdraft of 1000.00 threw
+`Mt5InsufficientFundsError`, second account got login 100002. `typecheck:libs`
+and api-server typecheck clean.
+
+---
+
 ### 1.1 — M1: broker schema + safe DDL script
 
 **Problem.** The trading-client platform needs its own data model. The deployed

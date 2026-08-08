@@ -364,6 +364,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../lib/db
+      '@workspace/mt5':
+        specifier: workspace:*
+        version: link:../../lib/integrations/mt5
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -663,6 +666,19 @@ importers:
       drizzle-kit:
         specifier: ^0.31.9
         version: 0.31.9
+
+  lib/integrations/mt5:
+    dependencies:
+      '@workspace/db':
+        specifier: workspace:*
+        version: link:../../db
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   scripts:
     dependencies:
