@@ -22,18 +22,31 @@ this up cold without re-investigating things that have already been decided.
 
 ## 🔀 HANDOFF — read this first
 
-**Status:** Building the forex-broker client platform (branch
-`claude/forex-broker-crm-6pnzla`): signup site + client CRM portal + broker
-admin, per the approved plan. Milestone commits land in order M1→M10; each
-entry below says what was verified.
-**Last verified:** per-entry, against a local Postgres 16 (cloud session cannot
-reach the deployed DB over TCP — see `.claude/rules/GENERAL-querying-live-data.md`).
-**Deployed?** No. Nothing in this branch is deployed.
+**Status:** Forex-broker client platform v1 COMPLETE on branch
+`claude/forex-broker-crm-6pnzla` (10 milestone commits, M1–M10): public
+signup with email-code verification, client portal (/portal) with
+KYC upload / wire+crypto deposits / withdrawals to own bank accounts /
+wallet↔MT5 transfers / KYC-gated MT5 account opening, and a broker admin
+(/broker-admin) with KYC review, funding approval queues and deposit
+settings. MT5 runs on the DB-backed mock adapter until real Manager API
+credentials exist. IB/referrals deliberately untouched (later phase).
+**Last verified:** end of session — two full Playwright browser journeys
+(client + admin) against local Postgres 16 + built api-server; all
+typechecks and production builds green. Cloud session cannot reach the
+deployed DB over TCP (`.claude/rules/GENERAL-querying-live-data.md`), so
+nothing was run against production.
+**Deployed?** No. Nothing in this branch is deployed, and the broker_*
+tables do NOT exist in the deployed databases yet — see Manual steps.
 
 ### Resume order
 
-1. Read the plan summary in Session 1 intro below, then continue with the next
-   unfinished milestone (task list in the working session, M1→M10).
+1. Get this branch merged (open the PR if none exists).
+2. Walk the client through the manual steps below — the DDL in both
+   databases FIRST, or every broker page 500s on an empty-looking screen.
+3. Next build phases when asked: real MT5 Manager API in
+   `lib/integrations/mt5/src/managerProvider.ts`; IB/referrals (the deployed
+   `ntw_*` partner CRM is the likely integration point); a public marketing
+   landing page in front of /portal/signup.
 
 ### Open
 
@@ -57,9 +70,12 @@ reach the deployed DB over TCP — see `.claude/rules/GENERAL-querying-live-data
 
 | Step | Why | Done? |
 |---|---|---|
-| Run the broker DDL in **both** Development and Production databases before publishing | See Open above; publish diffs prod against dev and would otherwise propose destructive drops | ☐ |
-| Enter wire details + crypto addresses in broker-admin → Settings | Deposits show these to clients | ☐ |
-| Verify Resend sending domain | Verification-code emails | ☐ |
+| Run `pnpm --filter @workspace/scripts run apply-broker-schema` (or paste its SQL in the Database pane) against **both** the Development and Production databases | The 11 broker_* tables exist nowhere yet; the platform only auto-migrates its own agent's changes, and creating them in one DB but not the other invites a destructive publish diff | ☐ |
+| Run `seed-broker` the same way (both DBs) | Creates Standard/Pro account types + placeholder deposit settings | ☐ |
+| Enter real wire details + crypto addresses in broker-admin → Settings | Clients see placeholders until then; the seed values cannot receive money | ☐ |
+| Verify the Resend sending domain (or set RESEND_API_KEY/RESEND_FROM_EMAIL secrets) | Verification-code emails must actually deliver — signup is blocked without them in production | ☐ |
+| Decide production KYC file storage and set KYC_UPLOAD_DIR | Autoscale local disk is ephemeral; uploaded identity documents would vanish on redeploy | ☐ |
+| When MT5 Manager API credentials exist: put them in the platform secrets store, implement managerProvider.ts, set MT5_PROVIDER=manager | Until then all trading accounts are simulated by the mock | ☐ |
 
 ---
 
@@ -71,6 +87,30 @@ email-code verification, client CRM portal with KYC/deposit/withdraw/transfer/
 MT5 trading accounts, broker admin with approval queues; MT5 through a mock
 adapter until the real Manager API is supplied; wire + crypto-deposit-only
 rails; Resend email).
+
+### 1.10 — M10: docs, env template, final verification
+
+**Problem.** The template docs still said TODO everywhere; the new platform's
+hazards, lookup tables and commands existed only in this log.
+
+**Change.** `CLAUDE.md` filled in for real: the 8 hazards (ntw_* push trap,
+money-as-strings, ledger invariant, dual auth systems, MT5-adapter-only,
+KYC file rules, Resend error shape, codegen loop), the directory map, the
+intent→directory table, the screen→page→route→table lookup, the auth
+boundary (per-route guards, no blanket middleware), background jobs (none,
+deliberately), and working commands. `.env.example` gains the broker block
+(MT5_PROVIDER, KYC_UPLOAD_DIR, Resend env-first keys) and states the true
+hard-required set. Handoff block above rewritten to the finished state.
+
+**Expected result.** A cold session can navigate the platform from CLAUDE.md
+without reading the tree.
+
+**Verified by.** Final sweep at session end: per-package typechecks all 0;
+api-server, client-portal and broker-admin production builds green (CSS
+bundles 36.1 KB / 34.6 KB — styling present); both Playwright journeys
+re-run PASS after the last code change (M9's auth fix). MEASURED.
+
+---
 
 ### 1.9 — M9: broker-admin app
 
