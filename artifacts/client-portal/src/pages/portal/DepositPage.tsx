@@ -73,19 +73,45 @@ export default function DepositPage() {
           <TabsContent value="wire" className="space-y-6">
             <Card>
               <CardHeader><CardTitle>Wire instructions</CardTitle></CardHeader>
-              <CardContent className="divide-y divide-border">
+              <CardContent>
                 {methods?.wire ? (
-                  <>
-                    <DetailRow label="Beneficiary" value={methods.wire.beneficiaryName} />
-                    <DetailRow label="Bank" value={methods.wire.bankName} />
-                    <DetailRow label="IBAN" value={methods.wire.iban} />
-                    <DetailRow label="Account number" value={methods.wire.accountNumber} />
-                    <DetailRow label="SWIFT / BIC" value={methods.wire.swift} />
-                    <DetailRow label="Bank address" value={methods.wire.bankAddress} />
-                    {methods.wire.referenceInstructions && (
-                      <p className="pt-3 text-sm text-primary">{methods.wire.referenceInstructions}</p>
+                  <div className="space-y-4">
+                    <div className="divide-y divide-border">
+                      <DetailRow label="Beneficiary" value={methods.wire.beneficiaryName} />
+                      <DetailRow label="Beneficiary address" value={methods.wire.beneficiaryAddress} />
+                      <DetailRow label="Beneficiary bank" value={methods.wire.bankName} />
+                      <DetailRow label="Bank address" value={methods.wire.bankAddress} />
+                    </div>
+                    {methods.wire.domestic && (
+                      <div>
+                        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Domestic US wires
+                        </p>
+                        <div className="divide-y divide-border rounded-lg border border-border px-4">
+                          <DetailRow label="Routing number" value={methods.wire.domestic.routingNumber} />
+                          <DetailRow label="Account number" value={methods.wire.domestic.accountNumber} />
+                        </div>
+                      </div>
                     )}
-                  </>
+                    {methods.wire.international && (
+                      <div>
+                        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          International wires
+                        </p>
+                        <div className="divide-y divide-border rounded-lg border border-border px-4">
+                          <DetailRow label="Send funds to" value={methods.wire.international.intermediaryBank} />
+                          <DetailRow label="SWIFT code" value={methods.wire.international.swift} />
+                          <DetailRow label="Beneficiary" value={methods.wire.international.beneficiaryBank} />
+                          <DetailRow label="Routing number" value={methods.wire.international.routingNumber} />
+                          <DetailRow label="Account number" value={methods.wire.international.accountNumber} />
+                          <DetailRow label="Memo / Ref" value={methods.wire.international.memo} />
+                        </div>
+                      </div>
+                    )}
+                    {methods.wire.referenceInstructions && (
+                      <p className="text-sm text-primary">{methods.wire.referenceInstructions}</p>
+                    )}
+                  </div>
                 ) : (
                   <p className="py-4 text-sm text-muted-foreground">Wire deposits are not available yet. Contact support.</p>
                 )}

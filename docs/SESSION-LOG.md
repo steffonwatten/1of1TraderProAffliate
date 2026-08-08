@@ -53,7 +53,8 @@ tables do NOT exist in the deployed databases yet — see Manual steps.
 | Item | Why it matters | Blocked on |
 |---|---|---|
 | Apply `broker_*` DDL to dev AND prod databases before deploying broker code | New tables will not exist in production otherwise; the platform only auto-migrates its own agent's changes | Client running `pnpm --filter @workspace/scripts run apply-broker-schema` with each DB's URL (or pasting the SQL in the platform's Database pane, both DBs) |
-| Real wire details + crypto deposit addresses | Deposit page shows placeholders until set in broker-admin Settings | Client input |
+| Crypto deposit addresses | Client will supply static per-coin addresses; entered in broker-admin → Settings (wire details are DONE — seeded from the client's real instructions, entry 1.11) | Client input |
+| Dependency advisories (6 high, prod tree) | Pre-existing on the base tree: express internals (path-to-regexp, qs, body-parser), drizzle-orm 0.45.1→0.45.2, js-cookie, brace-expansion. CI audits informationally; a dedicated bump+verify change is needed | Its own change, after merge |
 | MT5 Manager API credentials + real group names | Platform runs on the mock adapter until then (`MT5_PROVIDER=mock`) | Client input |
 | Resend domain/sender for client-portal emails | Verification codes must actually deliver | Client input |
 | Production KYC file storage | Local-disk storage is ephemeral on autoscale deployments; needs a persistent volume or object store | Client decision |
@@ -72,7 +73,7 @@ tables do NOT exist in the deployed databases yet — see Manual steps.
 |---|---|---|
 | Run `pnpm --filter @workspace/scripts run apply-broker-schema` (or paste its SQL in the Database pane) against **both** the Development and Production databases | The 11 broker_* tables exist nowhere yet; the platform only auto-migrates its own agent's changes, and creating them in one DB but not the other invites a destructive publish diff | ☐ |
 | Run `seed-broker` the same way (both DBs) | Creates Standard/Pro account types + placeholder deposit settings | ☐ |
-| Enter real wire details + crypto addresses in broker-admin → Settings | Clients see placeholders until then; the seed values cannot receive money | ☐ |
+| Enter crypto addresses in broker-admin → Settings (wire details already seeded with the real Blockcommerce / Old Glory Bank instructions) | Crypto tab shows "not available" until then | ☐ |
 | Verify the Resend sending domain (or set RESEND_API_KEY/RESEND_FROM_EMAIL secrets) | Verification-code emails must actually deliver — signup is blocked without them in production | ☐ |
 | Decide production KYC file storage and set KYC_UPLOAD_DIR | Autoscale local disk is ephemeral; uploaded identity documents would vanish on redeploy | ☐ |
 | When MT5 Manager API credentials exist: put them in the platform secrets store, implement managerProvider.ts, set MT5_PROVIDER=manager | Until then all trading accounts are simulated by the mock | ☐ |
@@ -87,6 +88,61 @@ email-code verification, client CRM portal with KYC/deposit/withdraw/transfer/
 MT5 trading accounts, broker admin with approval queues; MT5 through a mock
 adapter until the real Manager API is supplied; wire + crypto-deposit-only
 rails; Resend email).
+
+### 1.12 — Working CI pipeline
+
+**Problem.** `.github/workflows/ci.yml` invoked root scripts that do not
+exist (`db:push`, `lint`, `test`, `map`) — red on day one, which is how a
+pipeline gets switched off. Worse, `db:push` against a shared DB is exactly
+Hazard 1.
+
+**Change.** CI now runs what the repo actually has: frozen install →
+`apply-broker-schema` run TWICE against a fresh service Postgres (proves the
+DDL builds from nothing and is idempotent) + `seed-broker` → typecheck libs
++ the five real packages (mockup-sandbox excluded, pre-existing failure) →
+api-server build → all three frontend builds with their PORT/BASE_PATH →
+per-app CSS bundle guard (>20 KB) → prod dependency audit as
+`continue-on-error` (see Open items: 6 pre-existing high advisories need
+their own bump+verify change; blocking on them today kills the pipeline).
+
+**Expected result.** Green CI on this branch; schema script regression-tested
+on every PR.
+
+**Verified by.** MEASURED: the PR's CI run on GitHub (see 1.13 merge). All
+commands were first run locally with identical results.
+
+---
+
+### 1.11 — Real wire instructions (domestic + international)
+
+**Problem.** The client supplied their actual receiving details
+(Blockcommerce LLC via Old Glory Bank) — which have separate DOMESTIC US
+(direct routing/account) and INTERNATIONAL (via The Bankers Bank
+intermediary, SWIFT BBOKUS44, memo "Blockcommerce") instructions. The
+original single-block wire schema (one account/IBAN/SWIFT set) could not
+represent that without cramming it into free text.
+
+**Change.** `wireDetailsSchema` (brokerSettings.ts) and the OpenAPI
+`BrokerWireDetails` restructured: beneficiary block + optional
+`domestic {routingNumber, accountNumber}` + optional `international
+{intermediaryBank, swift, beneficiaryBank, routingNumber, accountNumber,
+memo}`. DepositPage renders the three sections; WireSettingsCard edits all
+fields; `seed-broker.ts` seeds the real instructions so production comes up
+configured (committed deliberately — these are the public payment
+instructions shown to every depositing client, not credentials).
+`onConflictDoNothing` preserved: re-running the seed never overwrites edits
+made later in Settings.
+
+**Expected result.** A depositing client sees exactly the instructions the
+client's bank issued, both rails.
+
+**Verified by.** MEASURED: old stored value deleted locally, seed re-run,
+`GET /client/deposit/methods` returns the full nested structure, and a
+browser screenshot of the deposit page shows Beneficiary / DOMESTIC US
+WIRES / INTERNATIONAL WIRES sections with the real values. Typechecks and
+builds green after codegen.
+
+---
 
 ### 1.10 — M10: docs, env template, final verification
 

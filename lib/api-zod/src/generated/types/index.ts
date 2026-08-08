@@ -64,6 +64,8 @@ export * from "./brokerTransactionDecisionRequestDecision";
 export * from "./brokerTransactionDecisionResponse";
 export * from "./brokerTransactionListResponse";
 export * from "./brokerWireDetails";
+export * from "./brokerWireDomestic";
+export * from "./brokerWireInternational";
 export * from "./brokerWireSettingsResponse";
 export * from "./campaignLink";
 export * from "./clientAccountTypesResponse";

@@ -2086,25 +2086,61 @@ components:
       required:
         - transactions
 
+    BrokerWireDomestic:
+      type: object
+      properties:
+        routingNumber:
+          type: string
+        accountNumber:
+          type: string
+      required:
+        - routingNumber
+        - accountNumber
+
+    BrokerWireInternational:
+      type: object
+      properties:
+        intermediaryBank:
+          type: string
+          nullable: true
+        swift:
+          type: string
+        beneficiaryBank:
+          type: string
+          nullable: true
+        routingNumber:
+          type: string
+          nullable: true
+        accountNumber:
+          type: string
+          nullable: true
+        memo:
+          type: string
+          nullable: true
+      required:
+        - swift
+
     BrokerWireDetails:
       type: object
       properties:
         beneficiaryName:
           type: string
+        beneficiaryAddress:
+          type: string
+          nullable: true
         bankName:
           type: string
-        accountNumber:
-          type: string
-          nullable: true
-        iban:
-          type: string
-          nullable: true
-        swift:
-          type: string
-          nullable: true
         bankAddress:
           type: string
           nullable: true
+        domestic:
+          oneOf:
+            - $ref: "#/components/schemas/BrokerWireDomestic"
+            - type: "null"
+        international:
+          oneOf:
+            - $ref: "#/components/schemas/BrokerWireInternational"
+            - type: "null"
         referenceInstructions:
           type: string
           nullable: true

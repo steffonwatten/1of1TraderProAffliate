@@ -6,13 +6,30 @@ import { z } from "zod/v4";
 // on write AND on read (a hand-edited row should fail loudly, not render).
 // These are NON-SECRET display values (what clients see on the deposit page).
 
+// Wire instructions split into domestic and international blocks because
+// real-world receiving banks (and this broker's actual setup) route the two
+// differently — one shared account field could not represent it.
 export const wireDetailsSchema = z.object({
   beneficiaryName: z.string().min(1),
+  beneficiaryAddress: z.string().nullish(),
   bankName: z.string().min(1),
-  accountNumber: z.string().nullish(),
-  iban: z.string().nullish(),
-  swift: z.string().nullish(),
   bankAddress: z.string().nullish(),
+  domestic: z
+    .object({
+      routingNumber: z.string().min(1),
+      accountNumber: z.string().min(1),
+    })
+    .nullish(),
+  international: z
+    .object({
+      intermediaryBank: z.string().nullish(),
+      swift: z.string().min(1),
+      beneficiaryBank: z.string().nullish(),
+      routingNumber: z.string().nullish(),
+      accountNumber: z.string().nullish(),
+      memo: z.string().nullish(),
+    })
+    .nullish(),
   referenceInstructions: z.string().nullish(),
 });
 export type WireDetails = z.infer<typeof wireDetailsSchema>;

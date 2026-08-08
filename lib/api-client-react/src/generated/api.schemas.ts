@@ -195,13 +195,27 @@ export interface ClientTransactionListResponse {
   transactions: ClientTransaction[];
 }
 
+export interface BrokerWireDomestic {
+  routingNumber: string;
+  accountNumber: string;
+}
+
+export interface BrokerWireInternational {
+  intermediaryBank?: string | null;
+  swift: string;
+  beneficiaryBank?: string | null;
+  routingNumber?: string | null;
+  accountNumber?: string | null;
+  memo?: string | null;
+}
+
 export interface BrokerWireDetails {
   beneficiaryName: string;
+  beneficiaryAddress?: string | null;
   bankName: string;
-  accountNumber?: string | null;
-  iban?: string | null;
-  swift?: string | null;
   bankAddress?: string | null;
+  domestic?: BrokerWireDomestic | null;
+  international?: BrokerWireInternational | null;
   referenceInstructions?: string | null;
 }
 

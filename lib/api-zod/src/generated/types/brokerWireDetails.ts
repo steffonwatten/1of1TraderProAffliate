@@ -5,13 +5,15 @@
  * 1OF1 Trader Pro Affiliate Back Office API
  * OpenAPI spec version: 0.1.0
  */
+import type { BrokerWireDomestic } from "./brokerWireDomestic";
+import type { BrokerWireInternational } from "./brokerWireInternational";
 
 export interface BrokerWireDetails {
   beneficiaryName: string;
+  beneficiaryAddress?: string | null;
   bankName: string;
-  accountNumber?: string | null;
-  iban?: string | null;
-  swift?: string | null;
   bankAddress?: string | null;
+  domestic?: BrokerWireDomestic | null;
+  international?: BrokerWireInternational | null;
   referenceInstructions?: string | null;
 }

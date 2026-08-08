@@ -1345,11 +1345,31 @@ export const GetClientDepositMethodsResponse = zod.object({
     .union([
       zod.object({
         beneficiaryName: zod.string(),
+        beneficiaryAddress: zod.string().nullish(),
         bankName: zod.string(),
-        accountNumber: zod.string().nullish(),
-        iban: zod.string().nullish(),
-        swift: zod.string().nullish(),
         bankAddress: zod.string().nullish(),
+        domestic: zod
+          .union([
+            zod.object({
+              routingNumber: zod.string(),
+              accountNumber: zod.string(),
+            }),
+            zod.null(),
+          ])
+          .optional(),
+        international: zod
+          .union([
+            zod.object({
+              intermediaryBank: zod.string().nullish(),
+              swift: zod.string(),
+              beneficiaryBank: zod.string().nullish(),
+              routingNumber: zod.string().nullish(),
+              accountNumber: zod.string().nullish(),
+              memo: zod.string().nullish(),
+            }),
+            zod.null(),
+          ])
+          .optional(),
         referenceInstructions: zod.string().nullish(),
       }),
       zod.null(),
@@ -1632,11 +1652,31 @@ export const GetBrokerWireSettingsResponse = zod.object({
     .union([
       zod.object({
         beneficiaryName: zod.string(),
+        beneficiaryAddress: zod.string().nullish(),
         bankName: zod.string(),
-        accountNumber: zod.string().nullish(),
-        iban: zod.string().nullish(),
-        swift: zod.string().nullish(),
         bankAddress: zod.string().nullish(),
+        domestic: zod
+          .union([
+            zod.object({
+              routingNumber: zod.string(),
+              accountNumber: zod.string(),
+            }),
+            zod.null(),
+          ])
+          .optional(),
+        international: zod
+          .union([
+            zod.object({
+              intermediaryBank: zod.string().nullish(),
+              swift: zod.string(),
+              beneficiaryBank: zod.string().nullish(),
+              routingNumber: zod.string().nullish(),
+              accountNumber: zod.string().nullish(),
+              memo: zod.string().nullish(),
+            }),
+            zod.null(),
+          ])
+          .optional(),
         referenceInstructions: zod.string().nullish(),
       }),
       zod.null(),
@@ -1650,11 +1690,31 @@ export const GetBrokerWireSettingsResponse = zod.object({
 export const UpdateBrokerWireSettingsBody = zod.object({
   wire: zod.object({
     beneficiaryName: zod.string(),
+    beneficiaryAddress: zod.string().nullish(),
     bankName: zod.string(),
-    accountNumber: zod.string().nullish(),
-    iban: zod.string().nullish(),
-    swift: zod.string().nullish(),
     bankAddress: zod.string().nullish(),
+    domestic: zod
+      .union([
+        zod.object({
+          routingNumber: zod.string(),
+          accountNumber: zod.string(),
+        }),
+        zod.null(),
+      ])
+      .optional(),
+    international: zod
+      .union([
+        zod.object({
+          intermediaryBank: zod.string().nullish(),
+          swift: zod.string(),
+          beneficiaryBank: zod.string().nullish(),
+          routingNumber: zod.string().nullish(),
+          accountNumber: zod.string().nullish(),
+          memo: zod.string().nullish(),
+        }),
+        zod.null(),
+      ])
+      .optional(),
     referenceInstructions: zod.string().nullish(),
   }),
 });

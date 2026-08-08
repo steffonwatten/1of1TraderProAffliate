@@ -34,24 +34,39 @@ if (existingTypes.length > 0) {
   console.log("Seeded account types: Standard, Pro");
 }
 
+// The broker's real receiving details (supplied by the client 2026-08-08).
+// These are deliberately committed: they are the public payment instructions
+// shown to every depositing client — not credentials. Editable any time in
+// broker-admin → Settings.
 await db
   .insert(brokerSettingsTable)
   .values([
     {
       key: "wire_details",
       value: {
-        beneficiaryName: "SET IN ADMIN SETTINGS",
-        bankName: "SET IN ADMIN SETTINGS",
-        accountNumber: null,
-        iban: null,
-        swift: null,
-        bankAddress: null,
-        referenceInstructions: "Include your client email as the payment reference",
+        beneficiaryName: "Blockcommerce LLC",
+        beneficiaryAddress: "17918 Blue Ridge Shores Dr., Cypress, TX 77433",
+        bankName: "Old Glory Bank",
+        bankAddress: "PO Box 127, Elmore City, OK 73433",
+        domestic: {
+          routingNumber: "103113441",
+          accountNumber: "4000055089",
+        },
+        international: {
+          intermediaryBank: "The Bankers Bank",
+          swift: "BBOKUS44",
+          beneficiaryBank: "Old Glory Bank",
+          routingNumber: "103113441",
+          accountNumber: "10740",
+          memo: "Blockcommerce",
+        },
+        referenceInstructions:
+          "Include your client email in the wire memo/reference so we can match your deposit.",
       },
     },
     { key: "crypto_addresses", value: [] },
   ])
   .onConflictDoNothing({ target: brokerSettingsTable.key });
-console.log("Deposit settings present (placeholders unless already configured)");
+console.log("Deposit settings present (kept existing values if already configured)");
 
 process.exit(0);
