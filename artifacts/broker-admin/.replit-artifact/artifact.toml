@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/broker-admin"
+title = "1OF1 Markets — Broker Admin"
+version = "1.0.0"
+id = "artifacts/broker-admin"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/broker-admin" ]
+localPort = 20465
+
+[services.development]
+run = "pnpm --filter @workspace/broker-admin run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/broker-admin", "run", "build" ]
+publicDir = "artifacts/broker-admin/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20465"
+BASE_PATH = "/broker-admin"

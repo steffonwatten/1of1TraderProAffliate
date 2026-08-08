@@ -4,6 +4,15 @@ import { db, emailLogsTable } from "@workspace/db";
 let connectionSettings: any;
 
 async function getCredentials() {
+  // Env-first so the app runs outside Replit (any host with a RESEND_API_KEY
+  // secret). The Replit connector below remains the source inside Replit.
+  if (process.env.RESEND_API_KEY) {
+    return {
+      apiKey: process.env.RESEND_API_KEY,
+      fromEmail: process.env.RESEND_FROM_EMAIL ?? "noreply@1of1traderpro.com",
+    };
+  }
+
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? "repl " + process.env.REPL_IDENTITY
@@ -37,7 +46,7 @@ async function getCredentials() {
   };
 }
 
-async function getUncachableResendClient() {
+export async function getUncachableResendClient() {
   const { apiKey, fromEmail } = await getCredentials();
   return { client: new Resend(apiKey), fromEmail };
 }

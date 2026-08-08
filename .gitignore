@@ -103,3 +103,6 @@ Thumbs.db
 # .claude/rules/ and .claude/launch.json ARE committed — they must travel with
 # the repo, because a cloud session clones only this repository.
 .claude/settings.local.json
+
+# KYC uploads (customer identity documents) — never commit
+.data/

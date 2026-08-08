@@ -26,35 +26,71 @@ here rather than working around it.
 
 ## 🔴 Hazards — read before touching anything
 
-> TODO: the things that will bite someone who does not know them. Be specific,
-> with file paths. Examples of the kind of thing that belongs here, from prior
-> engagements:
->
-> - *"The mount order in `routes/index.ts:45-52` is the security boundary.
->   Anything mounted above line 55 is reachable by anyone on the internet."*
-> - *"Money is `NUMERIC` and the ORM returns it as a string. Keep it a string —
->   converting to a number loses precision."*
-> - *"These three call sites share one mutex. It looks like a duplicated job and
->   is not. Do not delete one."*
-> - *"The upstream sends amounts with thousands separators. A new ingest path
->   that coerces naively will silently null out balances."*
->
-> Where something looks wrong but is right, **say so and say why.** Those notes
-> are what stop a future session "fixing" something load-bearing.
+1. **Never run `drizzle-kit push` against the deployed database.** It carries
+   17 `ntw_*` tables (a separate partner CRM sharing the DB) that are NOT in
+   `lib/db/src/schema/` — push will propose dropping them all. New broker
+   tables go through the idempotent `scripts/src/apply-broker-schema.ts`
+   (create-only), run in **both** dev and prod databases. Push is fine against
+   a local scratch Postgres only.
+2. **Money is `numeric` and Drizzle returns it as a string. Keep it a string.**
+   All arithmetic happens in SQL (`artifacts/api-server/src/lib/brokerLedger.ts`)
+   or via the integer-cents helpers in `lib/integrations/mt5/src/money.ts`.
+   Never `Number()` a balance.
+3. **Wallet balances mutate only inside the same `db.transaction()` as a
+   `broker_transactions` row** (insert or status transition). Decision UPDATEs
+   guard `status='pending'` — that guard is the double-approval protection; do
+   not "simplify" it away. Debits use a conditional UPDATE
+   (`WHERE balance >= amount`) as the overdraft guard.
+4. **Two separate auth systems, on purpose.** Affiliate/admin: `users` +
+   `user_sessions`, legacy static-salt SHA-256 (`src/lib/auth.ts` — known-weak,
+   left alone deliberately; fixing it mid-flight would lock out existing
+   users). Trading clients: `broker_clients` + `broker_client_sessions`,
+   bcrypt (`src/lib/clientAuth.ts`). Never mix middlewares or hash functions
+   across them.
+5. **MT5 goes only through `@workspace/mt5`** (`getMt5Provider()`, selected by
+   `MT5_PROVIDER`, default mock). `broker_mt5_mock_accounts` is the mock's
+   private state — the real Manager API never touches it. MT5 balances are
+   never stored on `broker_trading_accounts`; always read through the adapter.
+6. **KYC files never enter the repo.** They live in `KYC_UPLOAD_DIR`
+   (default `.data/kyc-uploads`, gitignored, ephemeral on autoscale) and are
+   served only through `requireAdmin` streaming endpoints.
+7. **The Resend SDK does not throw on API errors** — check `result.error`.
+   Broker emails (`src/lib/emailBroker.ts`) throw on failure by design;
+   verification-code sends must never be silently swallowed.
+8. **Generated code:** `lib/api-client-react/src/generated/` and
+   `lib/api-zod/src/generated/` regenerate from `lib/api-spec/openapi.yaml`.
+   Codegen loop: edit spec → `pnpm --filter @workspace/api-spec run codegen` →
+   delete `lib/*/tsconfig.tsbuildinfo artifacts/*/tsconfig.tsbuildinfo` → root
+   typecheck. Zod/type name collisions are resolved in `lib/api-zod/src/index.ts`'s
+   explicit re-export list.
 
 ---
 
 ## Where things are
 
 ```
-TODO: the directory map. Annotate — a bare tree is worth much less than one
-with a clause per line saying what lives there and what decides it.
+artifacts/api-server/          Express 5 API, everything mounted at /api (src/routes/index.ts)
+  src/routes/                  one file per surface: clientAuth, clientKyc, clientFunding,
+                               clientTradingAccounts, adminBroker{Kyc,Finance,Settings,TradingAccounts},
+                               plus the legacy affiliate routers
+  src/lib/                     auth.ts (affiliate/admin), clientAuth.ts (trading clients),
+                               brokerLedger.ts (money state machines), brokerSettings.ts,
+                               fileStorage.ts (KYC files), email.ts / emailBroker.ts
+artifacts/affiliate-dashboard/ legacy affiliate + admin SPA (path /, port 20463) — untouched
+artifacts/client-portal/       trading-client SPA (path /portal, port 20464): signup funnel + portal
+artifacts/broker-admin/        broker back-office SPA (path /broker-admin, port 20465)
+artifacts/mockup-sandbox/      dev-only; pre-existing typecheck failures, not deployed with changes
+lib/api-spec/openapi.yaml      THE API contract — source of truth for codegen
+lib/db/src/schema/             Drizzle schema; broker_* files are the trading platform
+lib/integrations/mt5/          @workspace/mt5 adapter (mock + Manager API stub)
+scripts/src/                   apply-broker-schema.ts, seed-broker.ts, seed-admin.ts
 ```
 
 ### Do not read these — machine-generated
 
 ```
-TODO: generated directories, with the spec they regenerate from.
+lib/api-client-react/src/generated/   from lib/api-spec/openapi.yaml (Orval)
+lib/api-zod/src/generated/            from lib/api-spec/openapi.yaml (Orval)
 ```
 
 Editing them by hand is always wrong. If you find yourself reading them, stop.
@@ -67,7 +103,14 @@ Editing them by hand is always wrong. If you find yourself reading them, stop.
 
 | I want to add… | It goes in | Notes |
 |---|---|---|
-| TODO | | |
+| a client-facing API endpoint | `lib/api-spec/openapi.yaml` + new/existing `artifacts/api-server/src/routes/client*.ts` | spec first, then codegen, then route; mount in `src/routes/index.ts` |
+| a broker-admin API endpoint | spec + `src/routes/adminBroker*.ts` | guard with `requireAdmin` |
+| a money movement | `src/lib/brokerLedger.ts` | never touch `broker_wallets.balance` anywhere else |
+| a broker email | `src/lib/emailBroker.ts` | throws on failure; affiliate emails stay in `email.ts` |
+| a client portal page | `artifacts/client-portal/src/pages/portal/` + a route line in `App.tsx` + a nav entry in `PortalLayout.tsx` | shared bits → `src/components/portal/` |
+| a broker-admin page | `artifacts/broker-admin/src/pages/` + route + nav | settings panels → `src/components/settings/` |
+| a table | `lib/db/src/schema/broker*.ts` + export in `schema/index.ts` + DDL in `scripts/src/apply-broker-schema.ts` | see Hazard 1 — never drizzle-kit push |
+| MT5 behavior | `lib/integrations/mt5/` | keep the `Mt5Provider` interface stable |
 
 **A page or screen file gets wiring only** — an import, a tab entry, a route
 line. If your change to it is longer than four lines, it belongs in a new file.
@@ -81,31 +124,49 @@ change.
 
 ## Finding the code for a screen
 
-> TODO: the mechanical lookup. Aim for a rule of thumb like:
-> **screen name → same-named page → same-named route file → same-named schema
-> file** — and then a table for the cases that break it.
+Rule of thumb: **screen name → same-named page file → client*/adminBroker*
+route file → broker_* table.** The full map for the broker platform:
 
-| Screen | Page | API route | Main table(s) |
+| Screen | Page | API route file | Main table(s) |
 |---|---|---|---|
-| TODO | | | |
+| Signup / Verify / Login | `client-portal/src/pages/public/*` | `routes/clientAuth.ts` | broker_clients, broker_email_codes, broker_client_sessions |
+| Dashboard | `portal/DashboardPage.tsx` | `routes/clientFunding.ts` | broker_wallets, broker_transactions |
+| Deposit | `portal/DepositPage.tsx` | `routes/clientFunding.ts` | broker_transactions, broker_settings |
+| Withdraw | `portal/WithdrawPage.tsx` | `routes/clientFunding.ts` | broker_bank_accounts, broker_transactions |
+| Transfer | `portal/TransferPage.tsx` | `routes/clientFunding.ts` | broker_transactions (+ MT5 adapter) |
+| Trading Accounts | `portal/TradingAccountsPage.tsx` | `routes/clientTradingAccounts.ts` | broker_trading_accounts, broker_account_types |
+| Verification (KYC) | `portal/VerificationPage.tsx` | `routes/clientKyc.ts` | broker_kyc_documents |
+| Admin: Clients / KYC | `broker-admin/src/pages/Clients*.tsx` | `routes/adminBrokerKyc.ts` | broker_clients, broker_kyc_documents |
+| Admin: Transactions | `broker-admin/src/pages/TransactionsPage.tsx` | `routes/adminBrokerFinance.ts` | broker_transactions |
+| Admin: Settings | `broker-admin/src/pages/SettingsPage.tsx` | `routes/adminBrokerSettings.ts` | broker_settings, broker_account_types |
 
 ---
 
 ## Request path / auth boundary
 
 ```
-TODO: where the authentication boundary is, by file and line.
+artifacts/api-server/src/routes/index.ts — every router mounts here.
+There is NO blanket auth middleware: each route carries its own guard.
+  requireAuth / requireAdmin / requireAffiliate  (src/lib/auth.ts, affiliate side)
+  requireClient                                  (src/lib/clientAuth.ts, trading clients)
+Public by design: /healthz, /auth/*, /client/auth/*, webhooks, tracking.
 ```
 
-**Check that line before adding a route.** Mount order decides whether a route is
-authenticated.
+**A new route without a guard is public.** Check which population it serves and
+attach the matching middleware before anything else.
 
 ---
 
 ## Background jobs
 
+**The broker platform adds none.** Deposits/withdrawals are approved by a
+human; transfers settle synchronously through the MT5 adapter; emails send
+inline on the triggering request. If a poller/reconciler is ever added, gate
+it behind `WORKERS_ENABLED` (see `.env.example` top block) and list it here.
+
 | File | Cadence | What it does | Gated by |
 |---|---|---|---|
+| — none — | | | |
 
 🔴 **Find the gate that stops these running, and put it in `.env.example` above
 everything else.** On a prior engagement a documented safety property was false
@@ -120,14 +181,34 @@ stopped it.
 ## Commands
 
 ```bash
-TODO
-# install       — pin the package manager in package.json so this works everywhere
-# typecheck     — must be 0
-# lint          — must be 0 errors
-# test          — check the COUNT, not just the exit code
-# build         — the only check that catches an unstyled UI
-# dev           — must actually work as written; verify the frontend reaches the API
+pnpm install                       # pnpm is enforced by a preinstall guard
+pnpm run typecheck:libs            # libs — must be 0
+pnpm --filter @workspace/api-server run typecheck        # must be 0
+pnpm --filter @workspace/client-portal run typecheck     # must be 0
+pnpm --filter @workspace/broker-admin run typecheck      # must be 0
+pnpm --filter @workspace/affiliate-dashboard run typecheck
+# NOTE: root `pnpm run typecheck` also runs mockup-sandbox, which fails on the
+# base tree (pre-existing, dev-only). Use the per-package commands above.
+
+pnpm --filter @workspace/api-server run build
+PORT=20464 BASE_PATH=/portal        pnpm --filter @workspace/client-portal run build
+PORT=20465 BASE_PATH=/broker-admin  pnpm --filter @workspace/broker-admin run build
+# Vite THROWS without PORT+BASE_PATH — that is deliberate, not a break.
+# Check the CSS bundle size on frontend changes; green tests can't see styling.
+
+# dev (three processes; Vite proxies /api → :8080):
+DATABASE_URL=... PORT=8080 NODE_ENV=development pnpm --filter @workspace/api-server run dev
+PORT=20464 BASE_PATH=/portal       pnpm --filter @workspace/client-portal run dev
+PORT=20465 BASE_PATH=/broker-admin pnpm --filter @workspace/broker-admin run dev
+
+# one-time per database (dev AND prod):
+DATABASE_URL=... pnpm --filter @workspace/scripts run apply-broker-schema
+DATABASE_URL=... pnpm --filter @workspace/scripts run seed-broker
 ```
+
+There is no lint config and no test suite yet — typecheck + build + a manual
+flow are the verification bar (browser E2E scripts were used in-session; see
+docs/SESSION-LOG.md).
 
 ⚠️ **Start the app the way the client will start it before telling them it
 works.** On a prior engagement a `CLAUDE.md` documented two dev commands that

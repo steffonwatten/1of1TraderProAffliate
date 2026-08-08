@@ -6,6 +6,12 @@ id = "artifacts/api-server"
 [[artifacts]]
 id = "artifacts/mockup-sandbox"
 
+[[artifacts]]
+id = "artifacts/client-portal"
+
+[[artifacts]]
+id = "artifacts/broker-admin"
+
 [deployment]
 router = "application"
 deploymentTarget = "autoscale"
