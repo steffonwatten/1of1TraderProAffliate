@@ -72,6 +72,36 @@ MT5 trading accounts, broker admin with approval queues; MT5 through a mock
 adapter until the real Manager API is supplied; wire + crypto-deposit-only
 rails; Resend email).
 
+### 1.8 — M8: client-portal feature pages
+
+**Problem.** The portal shell needed its real pages: dashboard, deposit
+(wire + crypto), withdraw, transfer, trading accounts, history,
+verification.
+
+**Change.** Seven pages in `src/pages/portal/` + shared
+`components/portal/TransactionList.tsx` and `lib/format.ts` (string-only
+money formatting). Deposit: wire-instructions card + notice form, crypto
+coin selector with copyable admin-configured addresses + txid form.
+Withdraw: bank-account management (add dialog, soft delete) + request form
+showing available balance. Transfer: direction + account picker with live
+balances. Trading accounts: card grid (balance/equity/leverage badges),
+create dialog gated on KYC with type/leverage from the catalog, and a
+show-once MT5 credentials dialog. Verification: three upload tiles with
+per-document status. History: type/status filters.
+
+**Expected result.** The full client lifecycle is usable from a browser.
+
+**Verified by.** MEASURED with a Playwright run against the dev server +
+built API + local Postgres: signup → real emailed-code path (code read from
+the dev log) → password → dashboard; KYC uploads; admin approval; MT5
+account created with credentials dialog; wire deposit 750 submitted +
+approved; 300 transferred to MT5; bank account added and 100 withdrawal
+requested — final dashboard shows wallet 350.00 USD, trading account
+300.00 USD, and the three transactions with correct statuses (screenshots
+in the session record). Typecheck + production build clean (CSS 36 KB).
+
+---
+
 ### 1.7 — M4: client-portal app scaffold + signup/login UI
 
 **Problem.** Clients need a website to sign up on and a portal to use — the
