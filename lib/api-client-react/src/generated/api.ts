@@ -41,6 +41,7 @@ import type {
   BrokerCryptoAddressesResponse,
   BrokerKycDecisionRequest,
   BrokerKycDecisionResponse,
+  BrokerTradingAccountListResponse,
   BrokerTransactionDecisionRequest,
   BrokerTransactionDecisionResponse,
   BrokerTransactionListResponse,
@@ -60,6 +61,7 @@ import type {
   ClientRegisterRequest,
   ClientResendCodeRequest,
   ClientSetPasswordRequest,
+  ClientTradingAccountListResponse,
   ClientTransactionListResponse,
   ClientVerifyEmailRequest,
   ClientVerifyEmailResponse,
@@ -73,6 +75,8 @@ import type {
   CreateClientBankAccountResponse,
   CreateClientDepositRequest,
   CreateClientDepositResponse,
+  CreateClientTradingAccountRequest,
+  CreateClientTradingAccountResponse,
   CreateClientTransferRequest,
   CreateClientTransferResponse,
   CreateClientWithdrawalRequest,
@@ -5788,6 +5792,254 @@ export function useListClientAccountTypes<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getListClientAccountTypesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List the client's trading accounts with live MT5 balances
+ */
+export const getListClientTradingAccountsUrl = () => {
+  return `/api/client/trading-accounts`;
+};
+
+export const listClientTradingAccounts = async (
+  options?: RequestInit,
+): Promise<ClientTradingAccountListResponse> => {
+  return customFetch<ClientTradingAccountListResponse>(
+    getListClientTradingAccountsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListClientTradingAccountsQueryKey = () => {
+  return [`/api/client/trading-accounts`] as const;
+};
+
+export const getListClientTradingAccountsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listClientTradingAccounts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listClientTradingAccounts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListClientTradingAccountsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listClientTradingAccounts>>
+  > = ({ signal }) => listClientTradingAccounts({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listClientTradingAccounts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListClientTradingAccountsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listClientTradingAccounts>>
+>;
+export type ListClientTradingAccountsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List the client's trading accounts with live MT5 balances
+ */
+
+export function useListClientTradingAccounts<
+  TData = Awaited<ReturnType<typeof listClientTradingAccounts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listClientTradingAccounts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListClientTradingAccountsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Open a new MT5 trading account (requires approved KYC)
+ */
+export const getCreateClientTradingAccountUrl = () => {
+  return `/api/client/trading-accounts`;
+};
+
+export const createClientTradingAccount = async (
+  createClientTradingAccountRequest: CreateClientTradingAccountRequest,
+  options?: RequestInit,
+): Promise<CreateClientTradingAccountResponse> => {
+  return customFetch<CreateClientTradingAccountResponse>(
+    getCreateClientTradingAccountUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(createClientTradingAccountRequest),
+    },
+  );
+};
+
+export const getCreateClientTradingAccountMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createClientTradingAccount>>,
+    TError,
+    { data: BodyType<CreateClientTradingAccountRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createClientTradingAccount>>,
+  TError,
+  { data: BodyType<CreateClientTradingAccountRequest> },
+  TContext
+> => {
+  const mutationKey = ["createClientTradingAccount"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createClientTradingAccount>>,
+    { data: BodyType<CreateClientTradingAccountRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createClientTradingAccount(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateClientTradingAccountMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createClientTradingAccount>>
+>;
+export type CreateClientTradingAccountMutationBody =
+  BodyType<CreateClientTradingAccountRequest>;
+export type CreateClientTradingAccountMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Open a new MT5 trading account (requires approved KYC)
+ */
+export const useCreateClientTradingAccount = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createClientTradingAccount>>,
+    TError,
+    { data: BodyType<CreateClientTradingAccountRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createClientTradingAccount>>,
+  TError,
+  { data: BodyType<CreateClientTradingAccountRequest> },
+  TContext
+> => {
+  return useMutation(getCreateClientTradingAccountMutationOptions(options));
+};
+
+/**
+ * @summary List all trading accounts with live MT5 balances
+ */
+export const getListBrokerTradingAccountsUrl = () => {
+  return `/api/admin/broker/trading-accounts`;
+};
+
+export const listBrokerTradingAccounts = async (
+  options?: RequestInit,
+): Promise<BrokerTradingAccountListResponse> => {
+  return customFetch<BrokerTradingAccountListResponse>(
+    getListBrokerTradingAccountsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListBrokerTradingAccountsQueryKey = () => {
+  return [`/api/admin/broker/trading-accounts`] as const;
+};
+
+export const getListBrokerTradingAccountsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listBrokerTradingAccounts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listBrokerTradingAccounts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListBrokerTradingAccountsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listBrokerTradingAccounts>>
+  > = ({ signal }) => listBrokerTradingAccounts({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listBrokerTradingAccounts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListBrokerTradingAccountsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listBrokerTradingAccounts>>
+>;
+export type ListBrokerTradingAccountsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all trading accounts with live MT5 balances
+ */
+
+export function useListBrokerTradingAccounts<
+  TData = Awaited<ReturnType<typeof listBrokerTradingAccounts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listBrokerTradingAccounts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListBrokerTradingAccountsQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

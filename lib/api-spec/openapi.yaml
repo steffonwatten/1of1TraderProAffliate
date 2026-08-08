@@ -1450,6 +1450,62 @@ paths:
               schema:
                 $ref: "#/components/schemas/ClientAccountTypesResponse"
 
+  # Trading accounts
+  /client/trading-accounts:
+    get:
+      operationId: listClientTradingAccounts
+      tags: [client]
+      summary: List the client's trading accounts with live MT5 balances
+      responses:
+        "200":
+          description: Trading accounts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientTradingAccountListResponse"
+    post:
+      operationId: createClientTradingAccount
+      tags: [client]
+      summary: Open a new MT5 trading account (requires approved KYC)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientTradingAccountRequest"
+      responses:
+        "201":
+          description: Account created — credentials are shown only once
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateClientTradingAccountResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: KYC not approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/broker/trading-accounts:
+    get:
+      operationId: listBrokerTradingAccounts
+      tags: [broker-admin]
+      summary: List all trading accounts with live MT5 balances
+      responses:
+        "200":
+          description: Trading accounts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrokerTradingAccountListResponse"
+
   # Broker admin — transactions & settings
   /admin/broker/transactions:
     get:
@@ -2298,6 +2354,137 @@ components:
             $ref: "#/components/schemas/BrokerAccountType"
       required:
         - accountTypes
+
+    ClientTradingAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+        mt5Login:
+          type: string
+        accountTypeId:
+          type: integer
+        accountTypeName:
+          type: string
+          nullable: true
+        leverage:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [active, archived]
+        balance:
+          type: string
+          nullable: true
+        equity:
+          type: string
+          nullable: true
+        marginFree:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - mt5Login
+        - accountTypeId
+        - leverage
+        - currency
+        - status
+        - createdAt
+
+    ClientTradingAccountListResponse:
+      type: object
+      properties:
+        tradingAccounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientTradingAccount"
+      required:
+        - tradingAccounts
+
+    CreateClientTradingAccountRequest:
+      type: object
+      properties:
+        accountTypeId:
+          type: integer
+        leverage:
+          type: integer
+      required:
+        - accountTypeId
+        - leverage
+
+    CreateClientTradingAccountResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        tradingAccount:
+          $ref: "#/components/schemas/ClientTradingAccount"
+        masterPassword:
+          type: string
+        investorPassword:
+          type: string
+      required:
+        - success
+        - tradingAccount
+        - masterPassword
+        - investorPassword
+
+    BrokerAdminTradingAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+        clientId:
+          type: integer
+        clientEmail:
+          type: string
+        clientName:
+          type: string
+        mt5Login:
+          type: string
+        accountTypeName:
+          type: string
+          nullable: true
+        leverage:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [active, archived]
+        balance:
+          type: string
+          nullable: true
+        equity:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - clientId
+        - clientEmail
+        - clientName
+        - mt5Login
+        - leverage
+        - currency
+        - status
+        - createdAt
+
+    BrokerTradingAccountListResponse:
+      type: object
+      properties:
+        tradingAccounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrokerAdminTradingAccount"
+      required:
+        - tradingAccounts
 
     BrokerAdminTransaction:
       type: object

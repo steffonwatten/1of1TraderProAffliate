@@ -19,6 +19,8 @@ import clientFundingRouter from "./clientFunding.js";
 import adminBrokerKycRouter from "./adminBrokerKyc.js";
 import adminBrokerFinanceRouter from "./adminBrokerFinance.js";
 import adminBrokerSettingsRouter from "./adminBrokerSettings.js";
+import clientTradingAccountsRouter from "./clientTradingAccounts.js";
+import adminBrokerTradingAccountsRouter from "./adminBrokerTradingAccounts.js";
 
 const router: IRouter = Router();
 
@@ -42,5 +44,7 @@ router.use("/client", clientFundingRouter);
 router.use("/admin/broker", adminBrokerKycRouter);
 router.use("/admin/broker", adminBrokerFinanceRouter);
 router.use("/admin/broker", adminBrokerSettingsRouter);
+router.use("/client", clientTradingAccountsRouter);
+router.use("/admin/broker", adminBrokerTradingAccountsRouter);
 
 export default router;

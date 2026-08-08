@@ -1454,6 +1454,57 @@ export const ListClientAccountTypesResponse = zod.object({
 });
 
 /**
+ * @summary List the client's trading accounts with live MT5 balances
+ */
+export const ListClientTradingAccountsResponse = zod.object({
+  tradingAccounts: zod.array(
+    zod.object({
+      id: zod.number(),
+      mt5Login: zod.string(),
+      accountTypeId: zod.number(),
+      accountTypeName: zod.string().nullish(),
+      leverage: zod.number(),
+      currency: zod.string(),
+      status: zod.enum(["active", "archived"]),
+      balance: zod.string().nullish(),
+      equity: zod.string().nullish(),
+      marginFree: zod.string().nullish(),
+      createdAt: zod.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Open a new MT5 trading account (requires approved KYC)
+ */
+export const CreateClientTradingAccountBody = zod.object({
+  accountTypeId: zod.number(),
+  leverage: zod.number(),
+});
+
+/**
+ * @summary List all trading accounts with live MT5 balances
+ */
+export const ListBrokerTradingAccountsResponse = zod.object({
+  tradingAccounts: zod.array(
+    zod.object({
+      id: zod.number(),
+      clientId: zod.number(),
+      clientEmail: zod.string(),
+      clientName: zod.string(),
+      mt5Login: zod.string(),
+      accountTypeName: zod.string().nullish(),
+      leverage: zod.number(),
+      currency: zod.string(),
+      status: zod.enum(["active", "archived"]),
+      balance: zod.string().nullish(),
+      equity: zod.string().nullish(),
+      createdAt: zod.date(),
+    }),
+  ),
+});
+
+/**
  * @summary List transactions across all clients
  */
 export const ListBrokerTransactionsQueryParams = zod.object({

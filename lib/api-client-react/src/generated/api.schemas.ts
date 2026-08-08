@@ -318,6 +318,71 @@ export interface ClientAccountTypesResponse {
   accountTypes: BrokerAccountType[];
 }
 
+export type ClientTradingAccountStatus =
+  (typeof ClientTradingAccountStatus)[keyof typeof ClientTradingAccountStatus];
+
+export const ClientTradingAccountStatus = {
+  active: "active",
+  archived: "archived",
+} as const;
+
+export interface ClientTradingAccount {
+  id: number;
+  mt5Login: string;
+  accountTypeId: number;
+  accountTypeName?: string | null;
+  leverage: number;
+  currency: string;
+  status: ClientTradingAccountStatus;
+  balance?: string | null;
+  equity?: string | null;
+  marginFree?: string | null;
+  createdAt: string;
+}
+
+export interface ClientTradingAccountListResponse {
+  tradingAccounts: ClientTradingAccount[];
+}
+
+export interface CreateClientTradingAccountRequest {
+  accountTypeId: number;
+  leverage: number;
+}
+
+export interface CreateClientTradingAccountResponse {
+  success: boolean;
+  tradingAccount: ClientTradingAccount;
+  masterPassword: string;
+  investorPassword: string;
+}
+
+export type BrokerAdminTradingAccountStatus =
+  (typeof BrokerAdminTradingAccountStatus)[keyof typeof BrokerAdminTradingAccountStatus];
+
+export const BrokerAdminTradingAccountStatus = {
+  active: "active",
+  archived: "archived",
+} as const;
+
+export interface BrokerAdminTradingAccount {
+  id: number;
+  clientId: number;
+  clientEmail: string;
+  clientName: string;
+  mt5Login: string;
+  accountTypeName?: string | null;
+  leverage: number;
+  currency: string;
+  status: BrokerAdminTradingAccountStatus;
+  balance?: string | null;
+  equity?: string | null;
+  createdAt: string;
+}
+
+export interface BrokerTradingAccountListResponse {
+  tradingAccounts: BrokerAdminTradingAccount[];
+}
+
 export type BrokerAdminTransactionType =
   (typeof BrokerAdminTransactionType)[keyof typeof BrokerAdminTransactionType];
 

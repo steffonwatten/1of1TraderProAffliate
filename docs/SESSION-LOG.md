@@ -72,6 +72,30 @@ MT5 trading accounts, broker admin with approval queues; MT5 through a mock
 adapter until the real Manager API is supplied; wire + crypto-deposit-only
 rails; Resend email).
 
+### 1.6 — M7: trading accounts backend (KYC-gated MT5 provisioning)
+
+**Problem.** Clients need to open MT5 accounts choosing an account type and
+leverage — but only after the broker approves their identity.
+
+**Change.** `routes/clientTradingAccounts.ts`: POST enforces
+`kycStatus === "approved"` (403 otherwise), validates leverage against the
+account type's catalog, provisions via `getMt5Provider().createAccount`, and
+returns master/investor passwords exactly once (never stored). GET merges
+live MT5 balance/equity best-effort — an adapter failure degrades to null
+balances rather than a broken page. `routes/adminBrokerTradingAccounts.ts`:
+all accounts joined with client + type + live balances.
+
+**Expected result.** Account opening is impossible pre-KYC and self-service
+post-KYC; balances shown are MT5's, never a stale copy.
+
+**Verified by.** MEASURED via curl: pre-KYC create → 403; leverage 500 →
+400 listing allowed values; create → login 200002 with both passwords;
+client list shows live balances (200001 at 60.00 from the M6 transfers) and
+a deliberately-broken login (999999) as null instead of an error; admin
+list mirrors with client identity.
+
+---
+
 ### 1.5 — M6: ledger + funding backend (deposit / withdraw / transfer)
 
 **Problem.** The money core: clients submit wire/crypto deposit notices and
