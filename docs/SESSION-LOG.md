@@ -22,74 +22,95 @@ this up cold without re-investigating things that have already been decided.
 
 ## 🔀 HANDOFF — read this first
 
-**Status:** TODO
-**Last verified:** TODO
-**Deployed?** TODO — and by whom, and confirmed how
+**Status:** Building the forex-broker client platform (branch
+`claude/forex-broker-crm-6pnzla`): signup site + client CRM portal + broker
+admin, per the approved plan. Milestone commits land in order M1→M10; each
+entry below says what was verified.
+**Last verified:** per-entry, against a local Postgres 16 (cloud session cannot
+reach the deployed DB over TCP — see `.claude/rules/GENERAL-querying-live-data.md`).
+**Deployed?** No. Nothing in this branch is deployed.
 
 ### Resume order
 
-1. TODO — the next thing to do, and why it is first
+1. Read the plan summary in Session 1 intro below, then continue with the next
+   unfinished milestone (task list in the working session, M1→M10).
 
 ### Open
 
 | Item | Why it matters | Blocked on |
 |---|---|---|
-| TODO | | |
+| Apply `broker_*` DDL to dev AND prod databases before deploying broker code | New tables will not exist in production otherwise; the platform only auto-migrates its own agent's changes | Client running `pnpm --filter @workspace/scripts run apply-broker-schema` with each DB's URL (or pasting the SQL in the platform's Database pane, both DBs) |
+| Real wire details + crypto deposit addresses | Deposit page shows placeholders until set in broker-admin Settings | Client input |
+| MT5 Manager API credentials + real group names | Platform runs on the mock adapter until then (`MT5_PROVIDER=mock`) | Client input |
+| Resend domain/sender for client-portal emails | Verification codes must actually deliver | Client input |
+| Production KYC file storage | Local-disk storage is ephemeral on autoscale deployments; needs a persistent volume or object store | Client decision |
 
 ### Closed / declined — do not re-investigate
 
 | Item | Why it was closed |
 |---|---|
-| TODO | |
+| Reusing the deployed `ntw_*` CRM for the trading-client portal | The NTW system (separate Replit app, not in this repo) is a *partner/IB* CRM; the client explicitly deferred IB/referrals and wants the trading-client surfaces, which exist nowhere. Schema snapshot kept as reference only. |
+| `drizzle-kit push` for the new tables | Deployed DB has 17 `ntw_*` tables absent from this repo's TS schema; push would propose dropping them. Hand-written idempotent DDL script instead. |
+| Fixing the affiliate auth's static-salt SHA-256 hashing in this branch | Pre-existing, separate surface; touching it mid-feature risks locking out existing users. Client auth uses bcrypt from the start. Flagged for its own change. |
 
 ### 🔴 Manual steps the client must do by hand
 
-> Things no push can accomplish — password resets, dashboard settings, SQL to run
-> in a specific database pane. These get lost otherwise.
-
 | Step | Why | Done? |
 |---|---|---|
-| TODO | | |
+| Run the broker DDL in **both** Development and Production databases before publishing | See Open above; publish diffs prod against dev and would otherwise propose destructive drops | ☐ |
+| Enter wire details + crypto addresses in broker-admin → Settings | Deposits show these to clients | ☐ |
+| Verify Resend sending domain | Verification-code emails | ☐ |
 
 ---
 
-## Session N — TODO date
+## Session 1 — 2026-08-08
 
-**Present:** TODO
+**Present:** Claude (cloud session), building from the approved plan in
+`/root/.claude/plans/` (forex-broker client platform v1: public signup with
+email-code verification, client CRM portal with KYC/deposit/withdraw/transfer/
+MT5 trading accounts, broker admin with approval queues; MT5 through a mock
+adapter until the real Manager API is supplied; wire + crypto-deposit-only
+rails; Resend email).
 
-### N.1 — TODO title
+### 1.1 — M1: broker schema + safe DDL script
 
-**Problem.** TODO — what was actually wrong, and how you know. MEASURED or
-INFERRED?
+**Problem.** The trading-client platform needs its own data model. The deployed
+DB additionally carries 17 `ntw_*` tables that are not in this repo's Drizzle
+schema, so the normal `drizzle-kit push` route is forbidden (it would propose
+dropping them) — MEASURED by reading `lib/db/drizzle/meta/0000_snapshot.json`.
 
-**Change.** TODO — what was done. Commit `TODO`.
+**Change.** 11 new Drizzle schema files in `lib/db/src/schema/` (all tables
+prefixed `broker_`: clients, client_sessions, email_codes, kyc_documents,
+wallets, bank_accounts, transactions ledger, trading_accounts, account_types,
+settings, mt5_mock_accounts) exported from `schema/index.ts`, plus a
+hand-written idempotent DDL script `scripts/src/apply-broker-schema.ts`
+(guarded `CREATE TYPE`, `CREATE TABLE/INDEX IF NOT EXISTS`; creates only,
+never drops or alters).
 
-**Expected result.** TODO — what should now be different.
+**Expected result.** ORM types available to api-server; running the script
+against any of the databases creates the 11 tables without touching anything
+else, and is safe to run twice.
 
-**Verified by.** TODO — **the right signal**, not "typecheck passed". On a prior
-engagement a change passed typecheck, lint and a full test suite while leaving an
-entire interface unstyled. Ask what would actually break if this were wrong, then
-check that.
+**Verified by.** MEASURED: script run twice against a local Postgres 16 —
+first run created all 11 tables, second run changed nothing and errored
+nothing; `pnpm run typecheck:libs`, scripts, api-server and
+affiliate-dashboard typechecks all clean. (`mockup-sandbox` typecheck fails on
+the untouched base tree too — pre-existing, not from this change.)
 
 ---
 
 ### Considered and NOT done
 
-> This half has already stopped work being repeated, and stopped a fix landing
-> that would have broken outbound customer messaging. Fill it in properly.
-
 | Considered | Why not |
 |---|---|
-| TODO | |
+| Balances derived by summing the ledger on every read | Stored balance + append-only ledger with atomic transitions is simpler to query and equally safe given the invariant: balance mutates only in the same DB transaction as a ledger insert/transition. |
+| Per-flow tables (deposits, withdrawals, transfers) | One `broker_transactions` ledger with `type`+`status` gives one admin queue, one history query, one state-machine helper. |
+| Storing MT5 balance/equity on `broker_trading_accounts` | Would rot instantly; always read through the adapter. |
 
 ---
 
 ### Corrections to earlier entries
 
-> Do not edit the original. Add here, and say what was wrong and how it was
-> found. A confident wrong explanation costs more than no explanation, because
-> it stops the search.
-
 | Entry | What it claimed | What is actually true |
 |---|---|---|
-| TODO | | |
+| — | | |
