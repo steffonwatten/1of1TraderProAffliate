@@ -232,7 +232,7 @@ export default function AdminAffiliateDetail() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={MousePointerClick} label="Total Clicks" value={String(aff.totalClicks ?? 0)} color="text-blue-400" />
+        <StatCard icon={MousePointerClick} label="Total Clicks" value={String(aff.totalClicks ?? 0)} color="text-cyan-400" />
         <StatCard icon={Users} label="Customers" value={String(aff.totalCustomers ?? 0)} color="text-emerald-400" />
         <StatCard icon={DollarSign} label="Total Revenue" value={fmt(aff.totalRevenue ?? 0)} color="text-primary" />
         <StatCard

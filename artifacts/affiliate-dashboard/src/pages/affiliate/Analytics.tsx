@@ -54,7 +54,7 @@ export default function AffiliateAnalytics() {
 
   const stats = [
     { label: 'Total Clicks', value: data?.totalClicks ?? 0, icon: MousePointerClick, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Unique Visitors', value: data?.uniqueVisitors ?? 0, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+    { label: 'Unique Visitors', value: data?.uniqueVisitors ?? 0, icon: Users, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
     { label: 'New Signups', value: data?.totalSignups ?? 0, icon: TrendingUp, color: 'text-green-400', bg: 'bg-green-500/10' },
     { label: 'Conv. Rate', value: `${(data?.conversionRate ?? 0).toFixed(1)}%`, icon: Activity, color: 'text-amber-400', bg: 'bg-amber-500/10' },
   ];

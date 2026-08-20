@@ -12,7 +12,7 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 
 const statusConfig: Record<string, { color: string; label: string }> = {
   active:    { color: 'bg-green-500/10 text-green-500 border-green-500/20',   label: 'Active' },
   expired:   { color: 'bg-red-500/10 text-red-500 border-red-500/20',         label: 'Expired' },
-  trialing:  { color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',      label: 'Trialing' },
+  trialing:  { color: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',      label: 'Trialing' },
   canceled:  { color: 'bg-gray-500/10 text-gray-400 border-gray-500/20',      label: 'Canceled' },
   completed: { color: 'bg-amber-500/10 text-amber-400 border-amber-500/20',   label: 'Completed' },
 };
@@ -46,7 +46,7 @@ export default function AdminMemberships() {
         {[
           { label: 'Total',     value: (data as any)?.total ?? 0,          color: 'text-primary',     bg: 'bg-primary/10',       icon: <Users className="w-5 h-5" /> },
           { label: 'Active',    value: (data as any)?.totalActive ?? 0,    color: 'text-green-500',   bg: 'bg-green-500/10',     icon: <CheckCircle2 className="w-5 h-5" /> },
-          { label: 'Trialing',  value: (data as any)?.totalTrialing ?? 0,  color: 'text-blue-500',    bg: 'bg-blue-500/10',      icon: <RefreshCw className="w-5 h-5" /> },
+          { label: 'Trialing',  value: (data as any)?.totalTrialing ?? 0,  color: 'text-cyan-500',    bg: 'bg-cyan-500/10',      icon: <RefreshCw className="w-5 h-5" /> },
           { label: 'Completed', value: (data as any)?.totalCompleted ?? 0, color: 'text-amber-400',   bg: 'bg-amber-500/10',     icon: <CheckCircle2 className="w-5 h-5" /> },
           { label: 'Expired',   value: (data as any)?.totalExpired ?? 0,   color: 'text-red-500',     bg: 'bg-red-500/10',       icon: <XCircle className="w-5 h-5" /> },
           { label: 'Canceled',  value: (data as any)?.totalCanceled ?? 0,  color: 'text-gray-400',    bg: 'bg-gray-500/10',      icon: <XCircle className="w-5 h-5" /> },

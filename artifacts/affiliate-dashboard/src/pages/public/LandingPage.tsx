@@ -108,7 +108,7 @@ export default function LandingPage() {
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <h1 className="text-5xl md:text-7xl font-display font-extrabold text-white mb-6 leading-tight">
                   Partner with <br />
-                  <span className="gold-gradient-text">1OF1 Trader Pro</span>
+                  <span className="brand-gradient-text">1OF1 Trader Pro</span>
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
                   Join the elite community of Introducing Brokers and Affiliates. Earn industry-leading lifetime commissions by promoting the ultimate trading experience.
@@ -252,7 +252,7 @@ export default function LandingPage() {
 
                     <Button 
                       type="submit" 
-                      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 text-background shadow-[0_0_30px_rgba(250,204,21,0.25)] hover:shadow-[0_0_40px_rgba(250,204,21,0.4)] transition-all duration-300 rounded-xl"
+                      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-primary to-[#29A8FF] hover:from-primary/90 hover:to-[#29A8FF]/90 text-primary-foreground shadow-[0_0_30px_rgba(47,139,255,0.28)] hover:shadow-[0_0_40px_rgba(47,139,255,0.45)] transition-all duration-300 rounded-xl"
                       disabled={mutation.isPending}
                     >
                       {mutation.isPending ? "Submitting..." : "Submit Application"}

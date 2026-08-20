@@ -14,7 +14,7 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('en-US', { mont
 
 const statusConfig: Record<string, { color: string; label: string }> = {
   pending: { color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20', label: 'Pending' },
-  processing: { color: 'bg-blue-500/10 text-blue-500 border-blue-500/20', label: 'Processing' },
+  processing: { color: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20', label: 'Processing' },
   paid: { color: 'bg-green-500/10 text-green-500 border-green-500/20', label: 'Paid' },
   failed: { color: 'bg-red-500/10 text-red-500 border-red-500/20', label: 'Failed' },
 };

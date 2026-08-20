@@ -427,7 +427,7 @@ export default function AdminCustomers() {
                       <td className="py-3 pr-4">
                         <Badge variant="outline" className={`text-xs font-medium ${
                           c.packagePrice >= 1500 ? 'border-purple-500/40 text-purple-400 bg-purple-500/10' :
-                          c.packagePrice >= 375 ? 'border-blue-500/40 text-blue-400 bg-blue-500/10' :
+                          c.packagePrice >= 375 ? 'border-cyan-500/40 text-cyan-400 bg-cyan-500/10' :
                           c.packagePrice >= 175 ? 'border-primary/40 text-primary bg-primary/10' :
                           'border-white/20 text-white/60 bg-white/5'
                         }`}>

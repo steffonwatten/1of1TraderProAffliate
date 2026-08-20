@@ -18,7 +18,7 @@ const fmtDateTime = (d: string | Date | null | undefined) =>
 
 const statusConfig: Record<string, { label: string; icon: React.ElementType; className: string }> = {
   active:    { label: 'Active',    icon: CheckCircle2, className: 'border-emerald-500/50 text-emerald-500 bg-emerald-500/10' },
-  trialing:  { label: 'Trialing', icon: Clock,        className: 'border-blue-500/50 text-blue-400 bg-blue-500/10' },
+  trialing:  { label: 'Trialing', icon: Clock,        className: 'border-cyan-500/50 text-cyan-400 bg-cyan-500/10' },
   completed: { label: 'Completed', icon: CheckCircle2, className: 'border-amber-500/50 text-amber-400 bg-amber-500/10' },
   expired:   { label: 'Expired',  icon: XCircle,      className: 'border-white/20 text-white/40 bg-white/5' },
   canceled:  { label: 'Canceled', icon: XCircle,      className: 'border-red-500/50 text-red-400 bg-red-500/10' },
@@ -26,7 +26,7 @@ const statusConfig: Record<string, { label: string; icon: React.ElementType; cla
 
 const commStatusConfig: Record<string, string> = {
   pending: 'border-amber-500/40 text-amber-400 bg-amber-500/10',
-  approved: 'border-blue-500/40 text-blue-400 bg-blue-500/10',
+  approved: 'border-cyan-500/40 text-cyan-400 bg-cyan-500/10',
   paid: 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10',
   rejected: 'border-red-500/40 text-red-400 bg-red-500/10',
 };
@@ -124,7 +124,7 @@ export default function AdminCustomerDetail() {
         </Card>
         <Card className="glass-panel">
           <CardContent className="p-6 flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center shrink-0">
               <Calendar className="w-5 h-5" />
             </div>
             <div className="min-w-0">

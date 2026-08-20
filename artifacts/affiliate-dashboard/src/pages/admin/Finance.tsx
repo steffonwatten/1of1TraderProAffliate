@@ -163,7 +163,7 @@ export default function AdminFinance() {
             sub={`vs ${fmt(data.lastMonthRevenue)} last month`} color="text-emerald-400"
             trend={{ value: momChange, label: 'vs last month' }} />
           <StatCard icon={TrendingUp} label="MRR (est.)" value={fmt(data.mrr)}
-            sub={`ARR ${fmtK(data.arr)}`} color="text-blue-400" />
+            sub={`ARR ${fmtK(data.arr)}`} color="text-cyan-400" />
           <StatCard icon={CreditCard} label="Avg. Order Value" value={fmt(data.aov)}
             sub={`${data.totalTransactions} transactions`} color="text-violet-400" />
         </div>

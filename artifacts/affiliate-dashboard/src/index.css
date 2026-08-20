@@ -33,42 +33,52 @@
 }
 
 :root {
-  /* TRUE BLACK & GOLD — 1OF1 Trader Pro */
-  --background: 0 0% 3%;        /* Pure black */
-  --foreground: 43 20% 95%;
+  /* ── 1OF1 TRADER INDICATOR — deep navy + electric blue ──────────────────
+     These values were eyedropped from the marketing site screenshot, not read
+     from its stylesheet (the host is unreachable from CI). If the real site
+     differs, correct THESE and nothing else — every surface below derives
+     from them. Status colours (amber = pending, green = paid, red = failed)
+     are deliberately NOT brand tokens; see the note above .status-* usage. */
+  --background: 218 46% 4%;
+  --foreground: 210 20% 98%;
 
-  --card: 0 0% 6%;              /* Near-black card */
-  --card-foreground: 43 20% 95%;
+  --card: 219 39% 8%;
+  --card-foreground: 210 20% 98%;
 
-  --popover: 0 0% 7%;
-  --popover-foreground: 43 20% 95%;
+  --popover: 219 39% 9%;
+  --popover-foreground: 210 20% 98%;
 
-  --primary: 43 96% 52%;        /* 1OF1 Gold */
-  --primary-foreground: 0 0% 3%;
+  --primary: 214 100% 54%;      /* electric blue — buttons, links, focus */
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 0 0% 11%;        /* Dark charcoal */
-  --secondary-foreground: 43 20% 85%;
+  --secondary: 218 30% 13%;
+  --secondary-foreground: 210 20% 90%;
 
-  --muted: 0 0% 11%;
-  --muted-foreground: 0 0% 50%;
+  --muted: 218 30% 13%;
+  --muted-foreground: 215 17% 65%;
 
-  --accent: 43 96% 52%;
-  --accent-foreground: 0 0% 3%;
+  --accent: 214 100% 54%;
+  --accent-foreground: 0 0% 100%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 43 15% 13%;         /* Subtle gold-tinted border */
-  --input: 0 0% 11%;
-  --ring: 43 96% 52%;
+  --border: 218 32% 15%;
+  --input: 218 30% 14%;
+  --ring: 214 100% 54%;
 
   --radius: 0.75rem;
 
-  --chart-1: 43 96% 52%;
-  --chart-2: 217 91% 60%;
+  /* The two endpoints of the logo's arrow gradient. Used by .brand-gradient-text
+     and .brand-glow so the chrome matches the mark rather than approximating it. */
+  --brand-deep: 224 79% 46%;
+  --brand-bright: 205 100% 58%;
+
+  --chart-1: 214 100% 54%;
+  --chart-2: 192 95% 50%;
   --chart-3: 142 71% 45%;
-  --chart-4: 280 85% 65%;
-  --chart-5: 0 84% 60%;
+  --chart-4: 262 83% 68%;
+  --chart-5: 38 92% 50%;
 }
 
 @layer base {
@@ -93,33 +103,33 @@
   background: hsl(var(--background));
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(43 40% 18%);
+  background: hsl(218 30% 20%);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(43 80% 38%);
+  background: hsl(214 90% 45%);
 }
 
-/* Black & Gold glassmorphism */
+/* Navy glassmorphism — one definition, 110 call sites. Retheme here, not there. */
 .glass-panel {
-  background: hsl(0 0% 6% / 0.85);
+  background: hsl(219 39% 8% / 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid hsl(43 25% 14%);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(250, 180, 21, 0.06);
+  border: 1px solid hsl(218 32% 15%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(47, 139, 255, 0.06);
 }
 
-/* Gold gradient text */
-.gold-gradient-text {
+/* Brand gradient text — mirrors the arrow in the logo */
+.brand-gradient-text {
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  background-image: linear-gradient(135deg, #d97706 0%, #fbbf24 40%, #f59e0b 70%, #d97706 100%);
+  background-image: linear-gradient(135deg, #1749D6 0%, #2F8BFF 45%, #29A8FF 70%, #1749D6 100%);
 }
 
-/* Subtle gold glow for primary elements */
-.gold-glow {
-  box-shadow: 0 0 20px rgba(251, 191, 36, 0.3), 0 0 60px rgba(251, 191, 36, 0.08);
+/* Subtle blue glow for primary elements */
+.brand-glow {
+  box-shadow: 0 0 20px rgba(47, 139, 255, 0.35), 0 0 60px rgba(47, 139, 255, 0.10);
 }
 
 /* Hide native cursor — replaced by GoldCursor React component */
