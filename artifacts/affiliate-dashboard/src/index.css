@@ -119,6 +119,18 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(47, 139, 255, 0.06);
 }
 
+/* Hero grid artwork — ONE definition, four call sites.
+   The source PNG is gold-toned from the previous brand. Rotating its hue to
+   brand blue is a stopgap so the page reads coherently today; when blue
+   artwork replaces the file, delete the filter line and nothing else. */
+.hero-grid {
+  background-image: url('/images/hero-bg.png');
+  background-size: cover;
+  background-position: center;
+  mix-blend-mode: screen;
+  filter: hue-rotate(175deg) saturate(0.85);
+}
+
 /* Brand gradient text — mirrors the arrow in the logo */
 .brand-gradient-text {
   background-clip: text;

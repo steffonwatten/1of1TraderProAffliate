@@ -52,7 +52,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute top-0 left-0 w-full h-[600px] bg-[url('/images/hero-bg.png')] bg-cover bg-center opacity-40 mix-blend-screen pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-[600px] hero-grid opacity-40 pointer-events-none" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-96 bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
 
       {/* Header */}

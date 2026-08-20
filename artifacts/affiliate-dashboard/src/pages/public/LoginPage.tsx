@@ -43,7 +43,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center relative p-4 overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-[url('/images/hero-bg.png')] bg-cover bg-center opacity-30 mix-blend-screen pointer-events-none" />
+      <div className="absolute inset-0 hero-grid opacity-30 pointer-events-none" />
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
