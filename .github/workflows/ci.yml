@@ -1,0 +1,109 @@
+# CI — install → schema apply (fresh Postgres) → typecheck → build → CSS guard
+#
+# Two things here are not obvious and both exist because something shipped
+# broken without them:
+#
+#   1. THE FRONTENDS ARE BUILT, and each CSS bundle size is checked. On a prior
+#      engagement a change passed typecheck, lint AND a full test suite while
+#      leaving the entire interface unstyled. The build was the only signal.
+#
+#   2. The schema script runs against a FRESH database every time, which keeps
+#      scripts/src/apply-broker-schema.ts honest: it must create everything
+#      from nothing, idempotently. (It is also run twice to prove idempotence.)
+#
+# There is no lint config and no test suite yet — when they land, add the steps
+# back here and check the test COUNT, not just the exit code.
+#
+# mockup-sandbox is excluded from typecheck: it fails on the base tree
+# (pre-existing, dev-only, not deployed).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready --health-interval 10s
+          --health-timeout 5s --health-retries 5
+        ports: [5432:5432]
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/test
+      NODE_ENV: test
+      # Never let CI start a worker fleet (none exist today; this stays).
+      WORKERS_ENABLED: "false"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # corepack reads "packageManager" from package.json, so the exact package
+      # manager version is pinned in ONE place rather than in this workflow.
+      - run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Apply broker schema (twice — must be idempotent)
+        run: |
+          pnpm --filter @workspace/scripts run apply-broker-schema
+          pnpm --filter @workspace/scripts run apply-broker-schema
+          pnpm --filter @workspace/scripts run seed-broker
+
+      - name: Typecheck libs
+        run: pnpm run typecheck:libs
+
+      - name: Typecheck apps
+        run: |
+          pnpm --filter @workspace/api-server run typecheck
+          pnpm --filter @workspace/client-portal run typecheck
+          pnpm --filter @workspace/broker-admin run typecheck
+          pnpm --filter @workspace/affiliate-dashboard run typecheck
+          pnpm --filter @workspace/scripts run typecheck
+
+      # ── The check that a green typecheck cannot give you ────────────────────
+      - name: Build api-server
+        run: pnpm --filter @workspace/api-server run build
+
+      - name: Build frontends (PORT/BASE_PATH are required by design)
+        run: |
+          PORT=20463 BASE_PATH=/             pnpm --filter @workspace/affiliate-dashboard run build
+          PORT=20464 BASE_PATH=/portal       pnpm --filter @workspace/client-portal run build
+          PORT=20465 BASE_PATH=/broker-admin pnpm --filter @workspace/broker-admin run build
+
+      - name: Guard against an unstyled UI
+        run: |
+          # A collapsed CSS bundle means styles compile but are not emitted —
+          # the exact failure that once passed typecheck, lint and tests.
+          for app in affiliate-dashboard client-portal broker-admin; do
+            css_bytes=$(find "artifacts/$app/dist" -name '*.css' -exec cat {} + 2>/dev/null | wc -c)
+            echo "$app CSS bundle: ${css_bytes} bytes"
+            if [ "${css_bytes}" -lt 20000 ]; then
+              echo "::error::$app CSS bundle collapsed to ${css_bytes} bytes — the UI is probably unstyled."
+              exit 1
+            fi
+          done
+
+      # ── Dependency audit: PRODUCTION ONLY, informational for now ───────────
+      # The base tree carries pre-existing high advisories (express internals,
+      # drizzle-orm 0.45.1). Bumping them is its own change — tracked in
+      # docs/SESSION-LOG.md Open items. Blocking on it today would just get
+      # this pipeline switched off.
+      - name: Audit production dependencies (informational)
+        continue-on-error: true
+        run: pnpm audit --prod --audit-level=high

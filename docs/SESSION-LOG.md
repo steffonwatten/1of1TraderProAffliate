@@ -80,6 +80,49 @@ tables do NOT exist in the deployed databases yet — see Manual steps.
 
 ---
 
+## Session 2 — 2026-08-20
+
+**Present:** Claude (cloud session), migrating the repository off Replit onto a
+new GitHub remote at the client's request.
+
+### 2.1 — Repository migrated to `steffonwatten/1of1TraderProAffliate`
+
+**Problem.** The original remote `steffonwatten/1of1-trader-backoffice` was
+archived and therefore read-only — pushes returned 403. A new empty repo,
+`1of1TraderProAffliate`, was created to replace it, but pushing the Replit
+workspace there failed a second time: GitHub refuses any push whose commits
+touch `.github/workflows/` unless the credential carries the `workflow` scope,
+and Replit's GitHub OAuth token does not.
+
+**Change.** `.github/workflows/` was stripped from all history with
+`git filter-branch --index-filter` in the Replit workspace, which let the
+existing OAuth credential push all 19 commits to the new remote. `ci.yml` is
+restored here as a separate commit, recovered byte-for-byte from the archived
+repository rather than rewritten from memory — entry 1.12 explains why each
+step in it exists.
+
+**Expected result.** `main` on the new remote carries the full v1 history, and
+CI behaves exactly as 1.12 describes once this commit reaches `main`.
+
+**Verified by.** MEASURED: `git ls-remote` shows `main` at `35b884f` with all
+19 commits present; the restored `ci.yml` is byte-identical to the archived
+repo's copy (`diff` clean); no credential-bearing or customer-data files are
+tracked (`git ls-files` scan against the `.gitignore` credential rules).
+NOT verified — INFERRED only: CI has never executed in this repository, so the
+pipeline is unproven on the new remote. The first run is the real check.
+
+**Not done.** The filter-branch rewrite changed every commit hash, so hashes
+cited in Session 1 refer to the archived repo's history, not to this one. The
+archived repo is deliberately left in place as the record of those hashes.
+
+**Correction to the handoff block above.** It says v1 is "COMPLETE on branch
+`claude/forex-broker-crm-6pnzla`" and instructs the reader to get that branch
+merged. That was already done before the migration — the branch is merged and
+its merge commit is the tip of `main` here. Resume order step 1 is closed; the
+manual steps below it are still open and unchanged.
+
+---
+
 ## Session 1 — 2026-08-08
 
 **Present:** Claude (cloud session), building from the approved plan in
