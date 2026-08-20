@@ -52,6 +52,11 @@ tables do NOT exist in the deployed databases yet — see Manual steps.
 
 | Item | Why it matters | Blocked on |
 |---|---|---|
+| 🔴 **The Whop webhook fails open twice** (`routes/webhooks.ts`) | `verifyWhopSignature` returns `true` when `WHOP_WEBHOOK_SECRET` is unset, and again when no signature header is present. The endpoint is unauthenticated and its events create `commissions` rows, so under either condition forged membership/payment events become real money owed | Confirming the secret is actually set in production **before** tightening to fail-closed — `.claude/rules/GENERAL-secrets.md` records an outage caused by making that change in the wrong order |
+| No `apply-affiliate-schema` script — 19 affiliate tables have no DDL | Only the 11 `broker_*` tables can be built from this repo. A fresh or CI database cannot stand up the affiliate side at all, so CI can never catch an affiliate schema regression the way it catches a broker one | Its own change: generate the DDL from `lib/db/src/schema/`, then add it to `ci.yml` alongside `apply-broker-schema` |
+| `.env.example` documents `AUTH_DEV_BYPASS=1`; **no code reads it** | Grep returns zero hits in `api-server` and `affiliate-dashboard`. A session following `.env.example` sets a no-op flag and then cannot explain why local requests 401. Local login actually requires `seed-admin` | A decision: implement the fail-closed gate the file describes, or delete the line. Do not leave both |
+| 25 `parseFloat`/`Number()` coercions of affiliate money | `commissions`, `payouts` and `payments` are `numeric(10,2)` read as strings; six route files coerce them to float before summing. Precision loss on money owed to affiliates | Its own change, per-file. The rule for now is do not add a 26th (CLAUDE.md Hazard B) |
+| `adminMisc.ts` — 820 lines, 18 unrelated endpoints | Whop sync, backfills, user creation, commission rules and four CSV exports in one file whose name conveys nothing. Every read of it is billed in full | Its own change: split into purpose-named routers, one at a time, verifying each |
 | Apply `broker_*` DDL to dev AND prod databases before deploying broker code | New tables will not exist in production otherwise; the platform only auto-migrates its own agent's changes | Client running `pnpm --filter @workspace/scripts run apply-broker-schema` with each DB's URL (or pasting the SQL in the platform's Database pane, both DBs) |
 | Crypto deposit addresses | Client will supply static per-coin addresses; entered in broker-admin → Settings (wire details are DONE — seeded from the client's real instructions, entry 1.11) | Client input |
 | Dependency advisories (6 high, prod tree) | Pre-existing on the base tree: express internals (path-to-regexp, qs, body-parser), drizzle-orm 0.45.1→0.45.2, js-cookie, brace-expansion. CI audits informationally; a dedicated bump+verify change is needed | Its own change, after merge |
@@ -84,6 +89,66 @@ tables do NOT exist in the deployed databases yet — see Manual steps.
 
 **Present:** Claude (cloud session), migrating the repository off Replit onto a
 new GitHub remote at the client's request.
+
+### 2.2 — CLAUDE.md rewritten to cover the affiliate back office
+
+**Problem.** `CLAUDE.md` described the affiliate back office in a single line —
+"legacy affiliate + admin SPA (path /, port 20463) — untouched" — and its screen
+map, hazards, "where to put new code" table and dev commands covered the broker
+platform only. The affiliate side is the live product and the larger surface: 28
+pages, 13 route files, 19 tables. The file's stated goal is "never read a large
+file to find out where something lives", and for the work actually being done it
+failed at that completely. Client asked for it fixed.
+
+**Change.** Every path verified against the tree before being written down.
+Added: a two-platform orientation table; affiliate hazards A–E; a 21-row
+affiliate screen map (screen → URL → page → route file → tables); affiliate rows
+in the "where to put new code" lookup; a measured guard audit of all 89
+endpoints; affiliate build and dev commands; five project-specific house rules.
+The broker sections and hazard numbering 1–8 are unchanged, so the two existing
+"Hazard 1" references still resolve.
+
+**Findings that came out of the verification** — all five are now in Open items:
+
+1. **The Whop webhook fails open twice.** `verifyWhopSignature` returns `true`
+   when `WHOP_WEBHOOK_SECRET` is unset, and `true` again when no signature header
+   is present. The endpoint is unauthenticated and its events create
+   `commissions` rows.
+2. **No DDL exists for the 19 affiliate tables** — only the 11 `broker_*` ones.
+   The affiliate side cannot be built from this repo into a fresh database.
+3. **`.env.example` documents `AUTH_DEV_BYPASS=1` and nothing reads it.** Zero
+   grep hits. Local login requires `seed-admin` instead.
+4. **25 lines coerce affiliate money to float** across six route files, against
+   the rule Hazard 2 states for broker money.
+5. **`adminMisc.ts` is 820 lines / 18 unrelated endpoints**, and it serves the
+   Admin: Customers screen — the one screen that breaks the naming pattern.
+
+**Expected result.** An agent picking up affiliate work can go screen → page →
+route → table without opening a file it does not need.
+
+**Verified by.** MEASURED, per claim: route/table mapping from `grep` of
+`*Table` imports per route file; guard coverage by grep of `require*` per file;
+endpoint counts from `router.<verb>` counts; page→API mapping from the generated
+hook names and raw `fetch` paths in each page; the 25 float coercions by grep;
+DDL coverage by diffing `CREATE TABLE` statements in `apply-broker-schema.ts`
+against `pgTable(...)` names in `lib/db/src/schema/`; the missing
+`AUTH_DEV_BYPASS` by grep returning zero hits.
+
+**Corrections made during the work, kept visible.** A first draft of the tree
+claimed `openapi.yaml` "covers the BROKER routes only; affiliate routes are
+hand-written". That was wrong — the spec has 70 paths and most are affiliate.
+Checking it produced the more useful fact that replaced it: the spec is
+*incomplete*, missing `adminMisc`'s exports, backfills, `whop/customers`,
+`whop/stats`, `sync/whop/full` and all of `adminSupportTickets`. A second draft
+told the reader to set `AUTH_DEV_BYPASS=1` for local dev, copied from
+`.env.example` rather than checked; the grep that followed is finding 3 above.
+
+**Not done.** None of the five findings are fixed — this change is documentation
+only, deliberately. Finding 1 in particular must not be "tightened" without first
+confirming the production secret exists; see the outage in
+`GENERAL-secrets.md`. No source file was touched.
+
+---
 
 ### 2.1 — Repository migrated to `steffonwatten/1of1TraderProAffliate`
 

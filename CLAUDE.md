@@ -1,4 +1,4 @@
-# Working in this repo — 1of1-trader-backoffice
+# Working in this repo — 1of1 Trader Pro back office
 
 > 📘 **The method for every project is in `playbook/PLAYBOOK.md`** — repo layout,
 > bringing a project in safely, the document set, code standards, CI shape,
@@ -24,7 +24,65 @@ here rather than working around it.
 
 ---
 
+## 🔴 Two platforms in one repo — know which one you are in
+
+Most work here is on the **affiliate back office**. It is the live product and
+the larger surface. The broker platform was added later and is not deployed.
+They share a database and an API server and nothing else — different auth,
+different money tables, different rules.
+
+| | **Affiliate back office** | Broker platform |
+|---|---|---|
+| App | `affiliate-dashboard` — path `/`, port 20463 | `client-portal` (`/portal`), `broker-admin` (`/broker-admin`) |
+| Who logs in | affiliates and staff admins | trading clients |
+| Auth | `users` + `user_sessions`, SHA-256 | `broker_clients` + `broker_client_sessions`, bcrypt |
+| Money | `commissions`, `payouts`, `payments` | `broker_wallets`, `broker_transactions` |
+| Revenue source | Whop webhooks + sync (`lib/whop.ts`) | manual deposits, MT5 transfers |
+| Status | **live** | built, never deployed (see `docs/SESSION-LOG.md`) |
+
+---
+
 ## 🔴 Hazards — read before touching anything
+
+### Affiliate back office — A to E
+
+**A. The Whop webhook fails open, in two separate ways.**
+`POST /api/webhooks/whop` is unauthenticated by design and protected only by an
+HMAC check in `src/routes/webhooks.ts`. `verifyWhopSignature` returns **`true`**
+when `WHOP_WEBHOOK_SECRET` is unset, and **`true` again** when no signature
+header is present — each logging a warning and continuing. Under either
+condition anyone who can reach the URL can forge membership and payment events,
+and those create `commissions` rows. Both branches are deliberate (they exist so
+data is not silently dropped) — so do not delete the warnings, and do not flip it
+to fail-closed without first confirming the secret is really set in production.
+`.claude/rules/GENERAL-secrets.md` records an outage caused by exactly that
+change made in the wrong order.
+
+**B. Affiliate money is `numeric(10,2)`, arrives as a string, and 25 existing
+lines `parseFloat` it anyway** (across `adminAffiliates`, `adminCommissions`,
+`adminMemberships`, `adminMisc`, `adminPayouts`, `affiliateDashboard`).
+Hazard 2 below is the rule for broker money; the affiliate side predates it and
+was never converted. **The rule here is do not add a 26th.** Sums that must be
+exact belong in SQL, not in a `reduce` over floats.
+
+**C. Affiliate and admin passwords are static-salt SHA-256** — one hard-coded
+salt, one round, no per-user salt (`hashPassword`, `src/lib/auth.ts`). Known
+weak, left alone **deliberately**: every existing password is stored this way and
+changing the function locks all of them out. It needs a migration with
+re-hash-on-login, not an in-passing "fix".
+
+**D. `src/routes/adminMisc.ts` is 820 lines and 18 unrelated endpoints** — Whop
+sync, backfills, user creation, commission-rule edits and four CSV exports. Its
+name tells you nothing, which is precisely why things get dumped in it. **New
+admin endpoints go in a purpose-named file.** Never extend this one.
+
+**E. Four endpoints export customer data as CSV** —
+`/api/admin/export/{customers,affiliates,commissions,payments}`, all
+`requireAdmin`, all in `adminMisc.ts`. The guard is correct; the *output* is the
+thing the repo rules forbid ever committing. Never write their response into the
+working tree.
+
+### Broker platform — 1 to 8
 
 1. **Never run `drizzle-kit push` against the deployed database.** It carries
    17 `ntw_*` tables (a separate partner CRM sharing the DB) that are NOT in
@@ -70,18 +128,33 @@ here rather than working around it.
 
 ```
 artifacts/api-server/          Express 5 API, everything mounted at /api (src/routes/index.ts)
-  src/routes/                  one file per surface: clientAuth, clientKyc, clientFunding,
-                               clientTradingAccounts, adminBroker{Kyc,Finance,Settings,TradingAccounts},
-                               plus the legacy affiliate routers
-  src/lib/                     auth.ts (affiliate/admin), clientAuth.ts (trading clients),
-                               brokerLedger.ts (money state machines), brokerSettings.ts,
-                               fileStorage.ts (KYC files), email.ts / emailBroker.ts
-artifacts/affiliate-dashboard/ legacy affiliate + admin SPA (path /, port 20463) — untouched
+  src/routes/                  ── AFFILIATE ──
+                               public.ts        landing, apply, referral click tracking (NO guard)
+                               auth.ts          login/logout/password reset (requireAuth on some)
+                               webhooks.ts      Whop inbound (NO guard — HMAC only; Hazard A)
+                               affiliateDashboard.ts   all 10 affiliate screens (requireAffiliate)
+                               admin{Overview,Applications,Affiliates,Commissions,Payouts,
+                                     Memberships,Finance,SupportTickets,Misc}.ts  (requireAdmin)
+                               ── BROKER ──
+                               client{Auth,Kyc,Funding,TradingAccounts}.ts
+                               adminBroker{Kyc,Finance,Settings,TradingAccounts}.ts
+  src/lib/                     auth.ts    affiliate/admin guards + hashPassword (Hazard C)
+                               whop.ts    710 lines — Whop API, sync, commission creation
+                               email.ts   affiliate email (Resend) + emailLogs
+                               clientAuth.ts / brokerLedger.ts / brokerSettings.ts /
+                               emailBroker.ts / fileStorage.ts   — broker side only
+artifacts/affiliate-dashboard/ THE LIVE PRODUCT (path /, port 20463): 4 public pages,
+                               10 affiliate pages, 14 admin pages
 artifacts/client-portal/       trading-client SPA (path /portal, port 20464): signup funnel + portal
 artifacts/broker-admin/        broker back-office SPA (path /broker-admin, port 20465)
 artifacts/mockup-sandbox/      dev-only; pre-existing typecheck failures, not deployed with changes
-lib/api-spec/openapi.yaml      THE API contract — source of truth for codegen
-lib/db/src/schema/             Drizzle schema; broker_* files are the trading platform
+lib/api-spec/openapi.yaml      THE API contract — source of truth for codegen (70 paths,
+                               both platforms). ⚠️ NOT complete: adminMisc's exports, backfills,
+                               whop/customers, whop/stats, sync/whop/full and the whole of
+                               adminSupportTickets are absent. Add the path when you touch them.
+lib/db/src/schema/             Drizzle schema. broker_* = trading platform; everything else
+                               (affiliates, commissions, payouts, payments, whop*, referral*,
+                               leadSignups, supportTickets, emailLogs, auditLogs) = affiliate
 lib/integrations/mt5/          @workspace/mt5 adapter (mock + Manager API stub)
 scripts/src/                   apply-broker-schema.ts, seed-broker.ts, seed-admin.ts
 ```
@@ -100,6 +173,20 @@ Editing them by hand is always wrong. If you find yourself reading them, stop.
 ## 🎯 Where to put new code
 
 **This table is the point of the file.** Intent → directory.
+
+**Affiliate back office** — the usual case:
+
+| I want to add… | It goes in | Notes |
+|---|---|---|
+| an affiliate-facing API endpoint | `lib/api-spec/openapi.yaml` + `src/routes/affiliateDashboard.ts` | guard `requireAffiliate`; that file is 560 lines — if your addition is substantial, make a new `affiliate*.ts` router and mount it |
+| an admin API endpoint | spec + a **purpose-named** `src/routes/admin<Thing>.ts` | guard `requireAdmin`; mount in `src/routes/index.ts`. **Never add to `adminMisc.ts`** — Hazard D |
+| an affiliate or admin page | `affiliate-dashboard/src/pages/{affiliate,admin}/` + a `<ProtectedRoute>` line in `App.tsx` + a nav entry | shared bits → `src/components/` |
+| a public / unauthenticated endpoint | spec + `src/routes/public.ts` | it is public — say why in the commit |
+| commission logic | `src/lib/whop.ts` | commissions are created there, off Whop events — not in the route files |
+| an affiliate email | `src/lib/email.ts` | writes `emailLogs`; broker emails stay in `emailBroker.ts` |
+| an affiliate table | `lib/db/src/schema/<name>.ts` + export in `schema/index.ts` | ⚠️ no DDL script covers the affiliate tables — see Hazard 1 before you touch the deployed DB |
+
+**Broker platform:**
 
 | I want to add… | It goes in | Notes |
 |---|---|---|
@@ -124,8 +211,50 @@ change.
 
 ## Finding the code for a screen
 
-Rule of thumb: **screen name → same-named page file → client*/adminBroker*
-route file → broker_* table.** The full map for the broker platform:
+Rule of thumb: **screen name → same-named page file → route file → table.**
+
+### Affiliate back office — `artifacts/affiliate-dashboard/src/pages/`
+
+Every affiliate screen is served by ONE router, `routes/affiliateDashboard.ts`
+(14 endpoints, `requireAffiliate`). Admin screens get one router each.
+
+| Screen | URL | Page | API route file | Main table(s) |
+|---|---|---|---|---|
+| Landing / Apply | `/`, `/apply` | `public/LandingPage.tsx` | `routes/public.ts` | affiliateApplications, leadSignups, referralClicks |
+| Login / Reset | `/login`, `/reset-password` | `public/LoginPage.tsx`, `public/ResetPasswordPage.tsx` | `routes/auth.ts` | users, userSessions, passwordResetTokens |
+| Affiliate: Dashboard | `/dashboard` | `affiliate/Dashboard.tsx` | `routes/affiliateDashboard.ts` | commissions, payments, referralClicks |
+| Affiliate: Links | `/dashboard/links` | `affiliate/Links.tsx` | `routes/affiliateDashboard.ts` | campaignLinks, referralClicks |
+| Affiliate: Customers | `/dashboard/customers` | `affiliate/Customers.tsx` | `routes/affiliateDashboard.ts` | whopCustomers, whopMemberships, leadSignups |
+| Affiliate: Commissions | `/dashboard/commissions` | `affiliate/Commissions.tsx` | `routes/affiliateDashboard.ts` | commissions, payments |
+| Affiliate: Payouts | `/dashboard/payouts` | `affiliate/Payouts.tsx` | `routes/affiliateDashboard.ts` | payouts, commissions |
+| Affiliate: Analytics | `/dashboard/analytics` | `affiliate/Analytics.tsx` | `routes/affiliateDashboard.ts` | referralClicks, commissions |
+| Affiliate: Support | `/dashboard/support` | `affiliate/Support.tsx` | `routes/affiliateDashboard.ts` | supportTickets, supportTicketMessages |
+| Affiliate: Profile / Security | `/dashboard/profile`, `/dashboard/security` | `affiliate/Profile.tsx`, `affiliate/Security.tsx` | `routes/affiliateDashboard.ts` | users, affiliates |
+| Admin: Overview | `/admin` | `admin/Overview.tsx` | `routes/adminOverview.ts` **+ `adminMisc.ts`** (the Whop sync / backfill buttons) | commissions, payments, affiliates, referralClicks |
+| Admin: Applications | `/admin/applications` | `admin/Applications.tsx` | `routes/adminApplications.ts` | affiliateApplications, users, affiliates |
+| Admin: Affiliates | `/admin/affiliates`, `/admin/affiliates/:id` | `admin/Affiliates.tsx`, `admin/AffiliateDetail.tsx` | `routes/adminAffiliates.ts` | affiliates, affiliateCommissionRules, commissions, payouts |
+| Admin: Commissions | `/admin/commissions` | `admin/Commissions.tsx` | `routes/adminCommissions.ts` | commissions, payments, whopCustomers |
+| Admin: Payouts | `/admin/payouts` | `admin/Payouts.tsx` | `routes/adminPayouts.ts` | payouts, commissions |
+| Admin: Memberships | `/admin/memberships`, `/admin/memberships/:id/detail` | `admin/Memberships.tsx`, `admin/CustomerDetail.tsx` | `routes/adminMemberships.ts` | whopMemberships, whopCustomers, payments |
+| Admin: Customers | `/admin/customers` | `admin/Customers.tsx` | `routes/adminMisc.ts` (`/whop/customers`) | whopCustomers, whopMemberships |
+| Admin: Finance | `/admin/finance` | `admin/Finance.tsx` | `routes/adminFinance.ts` **+ `adminMisc.ts`** (the CSV export buttons — Hazard E) | payments, commissions, whopMemberships |
+| Admin: Analytics | `/admin/analytics` | `admin/Analytics.tsx` | `routes/adminOverview.ts` | commissions, payments, referralClicks |
+| Admin: Audit / Email logs | `/admin/audit-logs`, `/admin/email-logs` | `admin/AuditLogs.tsx`, `admin/EmailLogs.tsx` | `routes/adminMisc.ts` | adminAuditLogs, emailLogs |
+| Admin: Support tickets | `/admin/support-tickets` | `admin/SupportTickets.tsx` | `routes/adminSupportTickets.ts` | supportTickets, supportTicketMessages |
+
+**Finding a page's API call:** most pages call a **generated hook**, not `fetch`
+— `useGetAffiliateDashboard`, `useGetAdminOverview`, `useCreateCampaignLink`.
+The hook name maps straight to the spec `operationId`, so grep
+`lib/api-spec/openapi.yaml` for it rather than opening the generated client.
+Pages that hit endpoints missing from the spec (Hazard D's exports, syncs and
+whop/customers) use raw `fetch("/api/admin/...")` instead — those are the ones
+to search by URL.
+
+**The one screen that breaks the pattern is Admin: Customers** — it is served by
+`adminMisc.ts`, not an `adminCustomers.ts`. That is Hazard D showing through.
+Fix it by moving the route, not by adding more to `adminMisc.ts`.
+
+### Broker platform
 
 | Screen | Page | API route file | Main table(s) |
 |---|---|---|---|
@@ -154,6 +283,23 @@ Public by design: /healthz, /auth/*, /client/auth/*, webhooks, tracking.
 
 **A new route without a guard is public.** Check which population it serves and
 attach the matching middleware before anything else.
+
+**Guard audit, measured — every endpoint as it stands today:**
+
+| Router | Mount | Endpoints | Guard |
+|---|---|---|---|
+| `public.ts` | `/` | 4 | **none — public by design** |
+| `webhooks.ts` | `/webhooks` | 1 | **none — HMAC only, and it fails open (Hazard A)** |
+| `auth.ts` | `/auth` | 9 | `requireAuth` on the session-bearing ones |
+| `affiliateDashboard.ts` | `/affiliate` | 14 | `requireAffiliate` |
+| all 9 `admin*.ts` (affiliate) | `/admin*` | 47 | `requireAdmin` |
+| all 4 broker `client*.ts` | `/client` | — | `requireClient` (except `/client/auth/*`) |
+| all 4 `adminBroker*.ts` | `/admin/broker` | 14 | `requireAdmin` |
+
+⚠️ **Four routers mount on the bare `/admin` prefix** — `adminOverview`,
+`adminFinance`, `adminMisc`, `adminSupportTickets`. Express matches them in mount
+order, so a path added to an earlier one **shadows** the same path in a later
+one. If a new `/admin/...` endpoint returns someone else's handler, this is why.
 
 ---
 
@@ -191,19 +337,36 @@ pnpm --filter @workspace/affiliate-dashboard run typecheck
 # base tree (pre-existing, dev-only). Use the per-package commands above.
 
 pnpm --filter @workspace/api-server run build
+PORT=20463 BASE_PATH=/              pnpm --filter @workspace/affiliate-dashboard run build   # THE LIVE APP
 PORT=20464 BASE_PATH=/portal        pnpm --filter @workspace/client-portal run build
 PORT=20465 BASE_PATH=/broker-admin  pnpm --filter @workspace/broker-admin run build
 # Vite THROWS without PORT+BASE_PATH — that is deliberate, not a break.
 # Check the CSS bundle size on frontend changes; green tests can't see styling.
 
-# dev (three processes; Vite proxies /api → :8080):
+# dev — for AFFILIATE work you need exactly these two processes:
 DATABASE_URL=... PORT=8080 NODE_ENV=development pnpm --filter @workspace/api-server run dev
+PORT=20463 BASE_PATH=/ pnpm --filter @workspace/affiliate-dashboard run dev
+# then open http://localhost:20463 — Vite proxies /api → :8080.
+
+# 🔴 There is NO dev auth bypass. `.env.example` documents AUTH_DEV_BYPASS=1,
+# but NOTHING IN THE CODE READS IT — grep confirms zero hits in api-server and
+# affiliate-dashboard. Setting it does nothing. To log in locally you must
+# create a real user:
+DATABASE_URL=... pnpm --filter @workspace/scripts run seed-admin
+# → admin@1of1traderpro.com / Admin1234!  (dev credentials, dev DB only)
+
+# broker work additionally:
 PORT=20464 BASE_PATH=/portal       pnpm --filter @workspace/client-portal run dev
 PORT=20465 BASE_PATH=/broker-admin pnpm --filter @workspace/broker-admin run dev
 
 # one-time per database (dev AND prod):
-DATABASE_URL=... pnpm --filter @workspace/scripts run apply-broker-schema
-DATABASE_URL=... pnpm --filter @workspace/scripts run seed-broker
+DATABASE_URL=... pnpm --filter @workspace/scripts run seed-admin        # affiliate side
+DATABASE_URL=... pnpm --filter @workspace/scripts run apply-broker-schema   # broker only
+DATABASE_URL=... pnpm --filter @workspace/scripts run seed-broker           # broker only
+# ⚠️ There is NO apply-schema script for the AFFILIATE tables. They exist only
+#    in the deployed databases and in lib/db/src/schema/. A fresh database
+#    cannot be built from this repo for the affiliate side — CI proves the
+#    broker DDL only. Adding one is tracked in docs/SESSION-LOG.md.
 ```
 
 There is no lint config and no test suite yet — typecheck + build + a manual
@@ -236,4 +399,15 @@ every API call 404'd for want of a proxy entry.
 5. ⓖ **Check claims against the code before repeating them.** On a prior
    engagement roughly a dozen audit findings failed inspection and had to be
    withdrawn or downgraded. That is the normal rate.
-6. TODO: this project's own rules.
+6. **Know which platform you are in before you type.** Affiliate and broker
+   share a database and nothing else. The wrong auth middleware or the wrong
+   money convention compiles fine and is wrong at runtime.
+7. **Never add an endpoint to `adminMisc.ts`.** It is 820 lines of eighteen
+   unrelated things because every previous change took the easy option.
+8. **Affiliate money: do not add a 26th `parseFloat`.** The 25 that exist are
+   grandfathered, not endorsed (Hazard B).
+9. **Adding an `/admin/...` route? Read `routes/index.ts` first.** Four routers
+   share the bare `/admin` mount and earlier ones shadow later ones.
+10. **Touching `webhooks.ts`? Read Hazard A first,** and do not change the
+   fail-open branches without deciding what happens in production when the
+   secret is missing.
