@@ -59,10 +59,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Apply broker schema (twice — must be idempotent)
+      - name: Apply schema (twice each — must be idempotent)
         run: |
           pnpm --filter @workspace/scripts run apply-broker-schema
           pnpm --filter @workspace/scripts run apply-broker-schema
+          pnpm --filter @workspace/scripts run apply-customer-schema
+          pnpm --filter @workspace/scripts run apply-customer-schema
           pnpm --filter @workspace/scripts run seed-broker
 
       - name: Typecheck libs

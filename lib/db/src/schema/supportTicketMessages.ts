@@ -5,7 +5,7 @@ import { z } from "zod/v4";
 export const supportTicketMessagesTable = pgTable("support_ticket_messages", {
   id: serial("id").primaryKey(),
   ticketId: integer("ticket_id").notNull(),
-  senderType: text("sender_type").notNull(), // "affiliate" | "admin"
+  senderType: text("sender_type").notNull(), // "affiliate" | "customer" | "admin"
   senderName: text("sender_name").notNull(),
   message: text("message").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
