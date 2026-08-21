@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, CheckCircle2, TrendingUp, Users, Globe, DollarSign } from 'lucide-react';
 import { useSubmitAffiliateApplication } from '@workspace/api-client-react';
+import BrandLockup from "@/components/BrandLockup";
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -58,11 +59,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-10 max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
         <div className="flex items-center">
-          <img
-            src={`${import.meta.env.BASE_URL}logo.png`}
-            alt="1OF1 Trader Pro"
-            className="h-12 w-auto object-contain drop-shadow-[0_0_16px_rgba(251,191,36,0.35)]"
-          />
+          <BrandLockup height={38} className="text-white" />
         </div>
         <Link href="/login" className="text-sm font-medium text-white hover:text-primary transition-colors">
           Partner Login <ArrowRight className="inline w-4 h-4 ml-1" />

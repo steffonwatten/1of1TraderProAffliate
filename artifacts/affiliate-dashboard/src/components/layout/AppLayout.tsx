@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import BrandLockup from "@/components/BrandLockup";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading, logout } = useAuth();
@@ -68,12 +69,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const SidebarContent = () => (
     <>
-      <div className="p-5 flex items-center gap-3" style={{ borderBottom: '1px solid hsl(43 25% 10%)' }}>
-        <img
-          src={`${import.meta.env.BASE_URL}logo.png`}
-          alt="1OF1 Trader Pro"
-          className="h-10 w-auto object-contain"
-        />
+      <div className="p-5 flex items-center gap-3 border-b border-border">
+        <BrandLockup height={34} className="text-white" />
       </div>
 
       <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
@@ -97,8 +94,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   : 'text-muted-foreground hover:text-white hover:bg-white/[0.04]'
               }`}
               style={isActive ? { 
-                background: 'linear-gradient(90deg, hsl(43 96% 52% / 0.1) 0%, transparent 100%)', 
-                borderLeft: '2px solid hsl(43 96% 52%)',
+                background: 'linear-gradient(90deg, hsl(var(--primary) / 0.12) 0%, transparent 100%)', 
+                borderLeft: '2px solid hsl(var(--primary))',
                 paddingLeft: '10px'
               } : { borderLeft: '2px solid transparent' }}
             >
@@ -110,7 +107,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         })}
       </nav>
 
-      <div className="p-3" style={{ borderTop: '1px solid hsl(43 25% 10%)' }}>
+      <div className="p-3 border-t border-border">
         <div className="flex items-center gap-3 mb-3 px-2 py-2 rounded-lg bg-white/[0.03]">
           <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm shrink-0">
             {user.fullName?.charAt(0)?.toUpperCase() ?? 'U'}
@@ -131,7 +128,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Desktop Sidebar */}
-      <aside className="w-60 shrink-0 flex-col z-10 hidden md:flex" style={{ background: 'hsl(0 0% 4%)', borderRight: '1px solid hsl(43 25% 10%)' }}>
+      <aside className="w-60 shrink-0 flex-col z-10 hidden md:flex" style={{ background: 'hsl(var(--card))', borderRight: '1px solid hsl(var(--border))' }}>
         <SidebarContent />
       </aside>
 
@@ -152,7 +149,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               exit={{ x: -240 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className="fixed inset-y-0 left-0 w-60 flex flex-col z-50 md:hidden"
-              style={{ background: 'hsl(0 0% 4%)', borderRight: '1px solid hsl(43 25% 10%)' }}
+              style={{ background: 'hsl(var(--card))', borderRight: '1px solid hsl(var(--border))' }}
             >
               <SidebarContent />
             </motion.aside>
@@ -163,11 +160,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
         {/* Mobile Header */}
-        <header className="h-14 flex items-center justify-between px-4 md:hidden" style={{ background: 'hsl(0 0% 4%)', borderBottom: '1px solid hsl(43 25% 10%)' }}>
+        <header className="h-14 flex items-center justify-between px-4 md:hidden" style={{ background: 'hsl(var(--card))', borderBottom: '1px solid hsl(var(--border))' }}>
           <button onClick={() => setMobileOpen(true)} className="text-muted-foreground hover:text-white transition-colors p-1">
             <Menu className="w-6 h-6" />
           </button>
-          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="1OF1 Trader Pro" className="h-8 w-auto object-contain" />
+          <BrandLockup height={28} className="text-white" />
           <button onClick={logout} className="text-muted-foreground hover:text-white transition-colors p-1">
             <LogOut className="w-5 h-5" />
           </button>

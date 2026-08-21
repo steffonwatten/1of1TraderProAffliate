@@ -139,6 +139,13 @@
   background-image: linear-gradient(135deg, #1749D6 0%, #2F8BFF 45%, #29A8FF 70%, #1749D6 100%);
 }
 
+/* Soft halo behind the lockup on the auth screens. A drop-shadow filter, not
+   a box-shadow: the lockup is transparent SVG, so a box shadow would outline
+   its bounding box instead of the artwork. */
+.brand-glow-soft {
+  filter: drop-shadow(0 0 18px rgba(47, 139, 255, 0.35));
+}
+
 /* Subtle blue glow for primary elements */
 .brand-glow {
   box-shadow: 0 0 20px rgba(47, 139, 255, 0.35), 0 0 60px rgba(47, 139, 255, 0.10);

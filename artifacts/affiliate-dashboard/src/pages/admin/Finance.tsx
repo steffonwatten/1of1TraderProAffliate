@@ -208,8 +208,8 @@ export default function AdminFinance() {
                 <AreaChart data={data.dailySales} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                   <defs>
                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(43 96% 52%)" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="hsl(43 96% 52%)" stopOpacity={0} />
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 12%)" />
@@ -218,7 +218,7 @@ export default function AdminFinance() {
                   <YAxis tick={{ fill: 'hsl(0 0% 40%)', fontSize: 10 }}
                     tickFormatter={v => `$${v}`} width={50} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="revenue" stroke="hsl(43 96% 52%)"
+                  <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))"
                     fill="url(#revGrad)" strokeWidth={2} dot={false} name="revenue" />
                 </AreaChart>
               </ResponsiveContainer>
