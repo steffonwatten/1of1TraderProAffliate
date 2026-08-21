@@ -8,11 +8,8 @@ packages:
 
 images:
   - path: "artifacts/affiliate-dashboard/public/images/hero-bg.png"
-    description: "Dark, moody, abstract financial background with subtle geometric grid lines and a soft glowing gold/amber light leak, symbolizing premium trading and wealth."
+    description: "Dark, moody, abstract financial background with subtle geometric grid lines and a soft glowing electric-blue light leak on deep navy, symbolizing premium trading. NOTE: the file currently in the repo is the previous gold artwork, hue-rotated to blue by the .hero-grid CSS filter. Replacing it with genuinely blue artwork means deleting that filter line in index.css."
     aspect_ratio: "16:9"
-  - path: "artifacts/affiliate-dashboard/public/images/logo-1of1.png"
-    description: "A premium, minimalist typographic logo saying '1OF1' in a sleek, bold sans-serif font, metallic gold color on a transparent background."
-    aspect_ratio: "3:4"
 
 notes:
   - Global fetch interceptor added in src/lib/auth.tsx to inject the Bearer token for all requests.
