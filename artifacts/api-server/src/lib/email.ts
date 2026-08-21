@@ -127,8 +127,8 @@ function emailWrapper(body: string): string {
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
         <tr><td style="text-align:center;padding-bottom:32px;">
-          <div style="display:inline-block;width:56px;height:56px;background:#facc15;border-radius:14px;line-height:56px;font-size:24px;font-weight:900;color:#0a0b0f;">1</div>
-          <p style="margin:12px 0 0;color:#facc15;font-weight:700;font-size:18px;letter-spacing:0.05em;">${BRAND_NAME}</p>
+          <div style="display:inline-block;width:56px;height:56px;background:#2F8BFF;border-radius:14px;line-height:56px;font-size:24px;font-weight:900;color:#ffffff;">1</div>
+          <p style="margin:12px 0 0;color:#2F8BFF;font-weight:700;font-size:18px;letter-spacing:0.05em;">${BRAND_NAME}</p>
         </td></tr>
         <tr><td style="background:#13151f;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:40px;">
           ${body}
@@ -148,13 +148,13 @@ export async function sendApplicationReceived(to: string, fullName: string): Pro
     <h1 style="color:#fff;font-size:24px;font-weight:700;margin:0 0 8px;">Application Received!</h1>
     <p style="color:#9ca3af;font-size:16px;margin:0 0 24px;">Hi ${fullName},</p>
     <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
-      Thank you for applying to the <strong style="color:#facc15;">${BRAND_NAME}</strong> Affiliate Program. We've received your application and our team will review it shortly.
+      Thank you for applying to the <strong style="color:#2F8BFF;">${BRAND_NAME}</strong> Affiliate Program. We've received your application and our team will review it shortly.
     </p>
     <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 24px;">
       We typically review applications within 1–3 business days. You'll receive an email once a decision has been made.
     </p>
     <div style="background:#0a0b0f;border:1px solid rgba(250,204,21,0.2);border-radius:10px;padding:20px;margin:0 0 24px;">
-      <p style="color:#facc15;font-size:14px;font-weight:600;margin:0 0 8px;">What happens next?</p>
+      <p style="color:#2F8BFF;font-size:14px;font-weight:600;margin:0 0 8px;">What happens next?</p>
       <ul style="color:#9ca3af;font-size:14px;line-height:1.8;margin:0;padding-left:20px;">
         <li>Our team reviews your application</li>
         <li>You'll receive an approval or feedback email</li>
@@ -179,23 +179,23 @@ export async function sendApplicationApproved(
   referralUrl: string
 ): Promise<void> {
   const body = `
-    <h1 style="color:#facc15;font-size:24px;font-weight:700;margin:0 0 8px;">You're Approved! 🎉</h1>
+    <h1 style="color:#2F8BFF;font-size:24px;font-weight:700;margin:0 0 8px;">You're Approved! 🎉</h1>
     <p style="color:#9ca3af;font-size:16px;margin:0 0 24px;">Hi ${fullName},</p>
     <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 24px;">
-      Congratulations! Your application to the <strong style="color:#facc15;">${BRAND_NAME}</strong> Affiliate Program has been <strong style="color:#22c55e;">approved</strong>. Welcome to the team!
+      Congratulations! Your application to the <strong style="color:#2F8BFF;">${BRAND_NAME}</strong> Affiliate Program has been <strong style="color:#22c55e;">approved</strong>. Welcome to the team!
     </p>
     <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 24px;">
       To get started, set your password using the button below. Then sign in with your email and the password you choose.
     </p>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
       <tr><td align="center">
-        <a href="${setPasswordUrl}" style="display:inline-block;background:#facc15;color:#0a0b0f;font-weight:700;font-size:15px;padding:14px 32px;border-radius:10px;text-decoration:none;">
+        <a href="${setPasswordUrl}" style="display:inline-block;background:#2F8BFF;color:#0a0b0f;font-weight:700;font-size:15px;padding:14px 32px;border-radius:10px;text-decoration:none;">
           Set Your Password →
         </a>
       </td></tr>
     </table>
     <div style="background:#0a0b0f;border:1px solid rgba(250,204,21,0.3);border-radius:12px;padding:24px;margin:0 0 24px;">
-      <p style="color:#facc15;font-size:14px;font-weight:700;margin:0 0 16px;text-transform:uppercase;letter-spacing:0.05em;">Your Account Details</p>
+      <p style="color:#2F8BFF;font-size:14px;font-weight:700;margin:0 0 16px;text-transform:uppercase;letter-spacing:0.05em;">Your Account Details</p>
       <table cellpadding="0" cellspacing="0" width="100%">
         <tr>
           <td style="color:#6b7280;font-size:13px;padding:6px 0;">Email</td>
@@ -209,11 +209,11 @@ export async function sendApplicationApproved(
     </div>
     <div style="background:#0a0b0f;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;margin:0 0 24px;">
       <p style="color:#9ca3af;font-size:13px;font-weight:600;margin:0 0 8px;">YOUR REFERRAL LINK</p>
-      <p style="color:#facc15;font-size:14px;font-family:monospace;word-break:break-all;margin:0;">${referralUrl}</p>
+      <p style="color:#2F8BFF;font-size:14px;font-family:monospace;word-break:break-all;margin:0;">${referralUrl}</p>
     </div>
     <div style="background:#0a0b0f;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;margin:0 0 24px;">
       <p style="color:#9ca3af;font-size:13px;margin:0 0 8px;">Or copy and paste this link into your browser:</p>
-      <p style="color:#facc15;font-size:13px;font-family:monospace;word-break:break-all;margin:0;">${setPasswordUrl}</p>
+      <p style="color:#2F8BFF;font-size:13px;font-family:monospace;word-break:break-all;margin:0;">${setPasswordUrl}</p>
     </div>
     <p style="color:#6b7280;font-size:13px;margin:0;text-align:center;">This password setup link expires in 7 days. Need a new one? Use "Forgot password?" on the sign-in page.</p>
   `;
@@ -234,12 +234,12 @@ export async function sendApplicationDenied(
     <h1 style="color:#fff;font-size:24px;font-weight:700;margin:0 0 8px;">Application Update</h1>
     <p style="color:#9ca3af;font-size:16px;margin:0 0 24px;">Hi ${fullName},</p>
     <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
-      Thank you for your interest in the <strong style="color:#facc15;">${BRAND_NAME}</strong> Affiliate Program.
+      Thank you for your interest in the <strong style="color:#2F8BFF;">${BRAND_NAME}</strong> Affiliate Program.
     </p>
     <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 24px;">
       After reviewing your application, we're unable to move forward at this time. We appreciate you taking the time to apply.
     </p>
-    ${notes ? `<div style="background:#0a0b0f;border-left:3px solid #facc15;border-radius:4px;padding:16px;margin:0 0 24px;">
+    ${notes ? `<div style="background:#0a0b0f;border-left:3px solid #2F8BFF;border-radius:4px;padding:16px;margin:0 0 24px;">
       <p style="color:#9ca3af;font-size:13px;font-weight:600;margin:0 0 8px;">FEEDBACK</p>
       <p style="color:#d1d5db;font-size:14px;line-height:1.6;margin:0;">${notes}</p>
     </div>` : ""}
@@ -275,7 +275,7 @@ export async function sendSupportTicketNotification(
         </tr>
         <tr>
           <td style="color:#6b7280;font-size:13px;padding:5px 0;">Category</td>
-          <td style="color:#facc15;font-size:13px;font-weight:600;padding:5px 0;">${categoryLabel}</td>
+          <td style="color:#2F8BFF;font-size:13px;font-weight:600;padding:5px 0;">${categoryLabel}</td>
         </tr>
         <tr>
           <td style="color:#6b7280;font-size:13px;padding:5px 0;">Subject</td>
@@ -308,14 +308,14 @@ export async function sendAdminReply(
     <h1 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 8px;">New Reply on Your Ticket</h1>
     <p style="color:#9ca3af;font-size:15px;margin:0 0 20px;">Hi ${affiliateName},</p>
     <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
-      The support team has replied to your ticket: <strong style="color:#facc15;">${subject}</strong>
+      The support team has replied to your ticket: <strong style="color:#2F8BFF;">${subject}</strong>
     </p>
-    <div style="background:#0a0b0f;border-left:3px solid #facc15;border-radius:8px;padding:16px 20px;margin:0 0 24px;">
+    <div style="background:#0a0b0f;border-left:3px solid #2F8BFF;border-radius:8px;padding:16px 20px;margin:0 0 24px;">
       <p style="color:#e5e7eb;font-size:15px;line-height:1.7;margin:0;white-space:pre-wrap;">${replyMessage}</p>
     </div>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
       <tr><td align="center">
-        <a href="${DASHBOARD_URL}" style="display:inline-block;background:#facc15;color:#0a0b0f;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;">
+        <a href="${DASHBOARD_URL}" style="display:inline-block;background:#2F8BFF;color:#0a0b0f;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;">
           View Full Conversation →
         </a>
       </td></tr>
@@ -338,19 +338,19 @@ export async function sendPasswordReset(
     <h1 style="color:#fff;font-size:24px;font-weight:700;margin:0 0 8px;">Reset Your Password</h1>
     <p style="color:#9ca3af;font-size:16px;margin:0 0 24px;">Hi ${fullName},</p>
     <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 24px;">
-      We received a request to reset your <strong style="color:#facc15;">${BRAND_NAME}</strong> dashboard password.
+      We received a request to reset your <strong style="color:#2F8BFF;">${BRAND_NAME}</strong> dashboard password.
       Click the button below to choose a new password. This link expires in <strong style="color:#fff;">1 hour</strong>.
     </p>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
       <tr><td align="center">
-        <a href="${resetUrl}" style="display:inline-block;background:#facc15;color:#0a0b0f;font-weight:700;font-size:15px;padding:14px 32px;border-radius:10px;text-decoration:none;">
+        <a href="${resetUrl}" style="display:inline-block;background:#2F8BFF;color:#0a0b0f;font-weight:700;font-size:15px;padding:14px 32px;border-radius:10px;text-decoration:none;">
           Reset My Password →
         </a>
       </td></tr>
     </table>
     <div style="background:#0a0b0f;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;margin:0 0 24px;">
       <p style="color:#9ca3af;font-size:13px;margin:0 0 8px;">Or copy and paste this link into your browser:</p>
-      <p style="color:#facc15;font-size:13px;font-family:monospace;word-break:break-all;margin:0;">${resetUrl}</p>
+      <p style="color:#2F8BFF;font-size:13px;font-family:monospace;word-break:break-all;margin:0;">${resetUrl}</p>
     </div>
     <p style="color:#6b7280;font-size:13px;margin:0;text-align:center;">
       If you didn't request a password reset, you can safely ignore this email. Your password won't change.

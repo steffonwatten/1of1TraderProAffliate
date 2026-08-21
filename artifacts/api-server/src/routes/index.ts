@@ -13,6 +13,9 @@ import adminMiscRouter from "./adminMisc.js";
 import adminFinanceRouter from "./adminFinance.js";
 import adminSupportTicketsRouter from "./adminSupportTickets.js";
 import affiliateDashboardRouter from "./affiliateDashboard.js";
+import customerAuthRouter from "./customerAuth.js";
+import customerPortalRouter from "./customerPortal.js";
+import adminTradingViewAccessRouter from "./adminTradingViewAccess.js";
 import clientAuthRouter from "./clientAuth.js";
 import clientKycRouter from "./clientKyc.js";
 import clientFundingRouter from "./clientFunding.js";
@@ -30,6 +33,9 @@ router.use("/", publicRouter);
 router.use("/webhooks", webhooksRouter);
 router.use("/admin/applications", adminApplicationsRouter);
 router.use("/admin/affiliates", adminAffiliatesRouter);
+// Mounted ahead of the bare-"/admin" routers below: Express matches in mount
+// order, so anything registered on "/admin" first would shadow these paths.
+router.use("/admin", adminTradingViewAccessRouter);
 router.use("/admin", adminOverviewRouter);
 router.use("/admin/payouts", adminPayoutsRouter);
 router.use("/admin/commissions", adminCommissionsRouter);
@@ -38,6 +44,9 @@ router.use("/admin", adminFinanceRouter);
 router.use("/admin", adminMiscRouter);
 router.use("/admin", adminSupportTicketsRouter);
 router.use("/affiliate", affiliateDashboardRouter);
+// Indicator customers — a third population, its own guard (requireCustomer).
+router.use("/customer", customerAuthRouter);
+router.use("/customer", customerPortalRouter);
 router.use("/client", clientAuthRouter);
 router.use("/client", clientKycRouter);
 router.use("/client", clientFundingRouter);
