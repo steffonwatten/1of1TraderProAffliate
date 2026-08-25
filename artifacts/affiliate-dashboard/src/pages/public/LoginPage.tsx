@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import BrandLockup from "@/components/BrandLockup";
+import { BrandLockup } from "@workspace/brand";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');

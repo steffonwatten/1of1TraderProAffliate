@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, CheckCircle2, TrendingUp, Users, Globe, DollarSign } from 'lucide-react';
 import { useSubmitAffiliateApplication } from '@workspace/api-client-react';
-import BrandLockup from "@/components/BrandLockup";
+import { BrandLockup } from "@workspace/brand";
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
