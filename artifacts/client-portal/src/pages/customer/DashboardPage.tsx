@@ -3,7 +3,8 @@ import { Link } from "wouter";
 import { useCustomerAuth, customerFetch } from "@/lib/customerAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Clock, LineChart, LifeBuoy, AlertTriangle, ArrowRight } from "lucide-react";
+import { CheckCircle2, Clock, LineChart, LifeBuoy, AlertTriangle, ArrowRight, ExternalLink } from "lucide-react";
+import TradingViewChart from "@/components/portal/TradingViewChart";
 
 // The customer's landing screen. Two questions only: is my subscription live,
 // and is the indicator on my charts? Everything else is a link.
@@ -128,6 +129,33 @@ export default function CustomerDashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Live market chart. The caption is load-bearing: this embed cannot draw
+          the 1OF1 indicator, and a customer who expects it here will read its
+          absence as a fault. The link is adjacent so the next step is obvious. */}
+      <div>
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+            Live market
+          </h2>
+          <a
+            href="https://www.tradingview.com/chart/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline shrink-0"
+          >
+            {accessGranted ? "Open with your indicator" : "Open on TradingView"}
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
+        <TradingViewChart
+          caption={
+            accessGranted
+              ? "A live TradingView chart. Your 1OF1 indicator runs on TradingView itself — open the chart there to see it plotted."
+              : "A live TradingView chart. The 1OF1 indicator is applied on TradingView once your access is granted."
+          }
+        />
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Link href="/indicator">
