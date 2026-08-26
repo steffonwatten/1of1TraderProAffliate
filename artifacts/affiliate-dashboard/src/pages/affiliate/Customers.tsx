@@ -32,7 +32,7 @@ type Customer = {
 
 const STATUS_LABELS: Record<string, { label: string; color: string; dot: string }> = {
   active: { label: 'Active', color: 'text-green-400', dot: 'bg-green-400' },
-  trialing: { label: 'Trial', color: 'text-blue-400', dot: 'bg-blue-400' },
+  trialing: { label: 'Trial', color: 'text-cyan-400', dot: 'bg-cyan-400' },
   past_due: { label: 'Past Due', color: 'text-yellow-400', dot: 'bg-yellow-400' },
   canceled: { label: 'Cancelled', color: 'text-red-400', dot: 'bg-red-400' },
   expired: { label: 'Expired', color: 'text-red-400/80', dot: 'bg-red-400/80' },

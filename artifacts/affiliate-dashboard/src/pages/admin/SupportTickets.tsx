@@ -18,7 +18,7 @@ const authFetch = (path: string, opts: RequestInit = {}) => {
 
 const STATUS_COLORS: Record<string, string> = {
   open: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
-  in_progress: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+  in_progress: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
   resolved: 'bg-green-500/15 text-green-400 border-green-500/30',
   closed: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30',
 };
@@ -244,7 +244,7 @@ function TicketRow({ ticket, onUpdate }: { ticket: Ticket; onUpdate: () => void 
               Save Notes
             </Button>
             {currentStatus !== 'in_progress' && (
-              <Button size="sm" variant="outline" onClick={() => updateTicket('in_progress')} disabled={savingNotes} className="text-xs text-blue-400 border-blue-500/30 hover:bg-blue-500/10">
+              <Button size="sm" variant="outline" onClick={() => updateTicket('in_progress')} disabled={savingNotes} className="text-xs text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10">
                 <Clock className="w-3.5 h-3.5 mr-1" /> Mark In Progress
               </Button>
             )}

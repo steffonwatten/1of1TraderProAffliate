@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { BrandLockup } from "@workspace/brand";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -43,7 +44,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center relative p-4 overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-[url('/images/hero-bg.png')] bg-cover bg-center opacity-30 mix-blend-screen pointer-events-none" />
+      <div className="absolute inset-0 hero-grid opacity-30 pointer-events-none" />
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -52,11 +53,7 @@ export default function LoginPage() {
         className="w-full max-w-md relative z-10"
       >
         <div className="text-center mb-8">
-          <img
-            src={`${import.meta.env.BASE_URL}logo.png`}
-            alt="1OF1 Trader Pro"
-            className="h-20 w-auto object-contain mx-auto mb-4 drop-shadow-[0_0_24px_rgba(251,191,36,0.4)]"
-          />
+          <BrandLockup height={46} className="mx-auto mb-4 text-white brand-glow-soft" />
           <h1 className="text-3xl font-display font-bold text-white mb-2">Welcome Back</h1>
           <p className="text-muted-foreground">Sign in to your partner dashboard</p>
         </div>

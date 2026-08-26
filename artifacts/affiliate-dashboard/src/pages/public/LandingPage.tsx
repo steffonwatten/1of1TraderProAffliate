@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, CheckCircle2, TrendingUp, Users, Globe, DollarSign } from 'lucide-react';
 import { useSubmitAffiliateApplication } from '@workspace/api-client-react';
+import { BrandLockup } from "@workspace/brand";
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -52,17 +53,13 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute top-0 left-0 w-full h-[600px] bg-[url('/images/hero-bg.png')] bg-cover bg-center opacity-40 mix-blend-screen pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-[600px] hero-grid opacity-40 pointer-events-none" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-96 bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
 
       {/* Header */}
       <header className="relative z-10 max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
         <div className="flex items-center">
-          <img
-            src={`${import.meta.env.BASE_URL}logo.png`}
-            alt="1OF1 Trader Pro"
-            className="h-12 w-auto object-contain drop-shadow-[0_0_16px_rgba(251,191,36,0.35)]"
-          />
+          <BrandLockup height={38} className="text-white" />
         </div>
         <Link href="/login" className="text-sm font-medium text-white hover:text-primary transition-colors">
           Partner Login <ArrowRight className="inline w-4 h-4 ml-1" />
@@ -108,7 +105,7 @@ export default function LandingPage() {
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <h1 className="text-5xl md:text-7xl font-display font-extrabold text-white mb-6 leading-tight">
                   Partner with <br />
-                  <span className="gold-gradient-text">1OF1 Trader Pro</span>
+                  <span className="brand-gradient-text">1OF1 Trader Pro</span>
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
                   Join the elite community of Introducing Brokers and Affiliates. Earn industry-leading lifetime commissions by promoting the ultimate trading experience.
@@ -252,7 +249,7 @@ export default function LandingPage() {
 
                     <Button 
                       type="submit" 
-                      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 text-background shadow-[0_0_30px_rgba(250,204,21,0.25)] hover:shadow-[0_0_40px_rgba(250,204,21,0.4)] transition-all duration-300 rounded-xl"
+                      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-primary to-[#29A8FF] hover:from-primary/90 hover:to-[#29A8FF]/90 text-primary-foreground shadow-[0_0_30px_rgba(47,139,255,0.28)] hover:shadow-[0_0_40px_rgba(47,139,255,0.45)] transition-all duration-300 rounded-xl"
                       disabled={mutation.isPending}
                     >
                       {mutation.isPending ? "Submitting..." : "Submit Application"}

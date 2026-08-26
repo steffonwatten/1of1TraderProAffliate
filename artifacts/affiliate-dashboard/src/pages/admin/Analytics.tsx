@@ -48,7 +48,7 @@ export default function AdminAnalytics() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: 'Total Clicks', value: data?.totalClicks ?? 0, icon: <MousePointerClick />, color: 'text-primary' },
-          { label: 'Unique Visitors', value: data?.uniqueVisitors ?? 0, icon: <Users />, color: 'text-blue-500' },
+          { label: 'Unique Visitors', value: data?.uniqueVisitors ?? 0, icon: <Users />, color: 'text-cyan-500' },
           { label: 'Signups', value: data?.totalSignups ?? 0, icon: <TrendingUp />, color: 'text-green-500' },
           { label: 'Conv. Rate', value: `${(data?.conversionRate ?? 0).toFixed(2)}%`, icon: <Activity />, color: 'text-amber-500' },
         ].map(s => (

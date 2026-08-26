@@ -1,3 +1,15 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+  <!-- Brand mark: the rising ribbon from the 1OF1 lockup on the app's own
+       surface colour. Kept as SVG so it stays sharp on every tab density.
+       Matches components/BrandLockup.tsx — change both together. -->
+  <defs>
+    <linearGradient id="fav" x1="30" y1="150" x2="150" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1749D6"/>
+      <stop offset="100%" stop-color="#29A8FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" rx="38" fill="#0D1420"/>
+  <path d="M32 138 C 74 128, 110 100, 132 54"
+        stroke="url(#fav)" stroke-width="22" stroke-linecap="round" fill="none"/>
+  <path d="M156 26 L 146 74 L 110 40 Z" fill="url(#fav)"/>
 </svg>

@@ -283,7 +283,7 @@ export default function AffiliateResources() {
                 '"Sponsored by 1OF1 Trader Pro"',
                 '"I partner with 1OF1 Trader Pro and earn a commission from referrals"',
               ],
-              color: 'border-blue-500/20 bg-blue-500/5',
+              color: 'border-cyan-500/20 bg-cyan-500/5',
             },
             {
               title: '⚠️ Financial Promotion Rules',

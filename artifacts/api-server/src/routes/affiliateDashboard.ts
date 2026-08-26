@@ -456,6 +456,10 @@ router.post("/support", requireAffiliate, async (req, res) => {
     const senderName = user.fullName ?? user.email;
 
     const [ticket] = await db.insert(supportTicketsTable).values({
+      // Explicit rather than relying on the column default: the inbox now
+      // carries customer tickets too, and a ticket that misreports which
+      // population raised it routes the reply to the wrong person.
+      requesterType: "affiliate",
       affiliateId,
       affiliateName: senderName,
       affiliateEmail: user.email,

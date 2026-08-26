@@ -20,7 +20,7 @@ const METHOD_MINIMUMS: Record<string, { min: number; label: string }> = {
 
 const statusConfig: Record<string, { color: string; label: string; dot: string }> = {
   pending: { color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/25', label: 'Under Review', dot: 'bg-yellow-400' },
-  processing: { color: 'bg-blue-500/10 text-blue-400 border-blue-500/25', label: 'Processing', dot: 'bg-blue-400' },
+  processing: { color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/25', label: 'Processing', dot: 'bg-cyan-400' },
   paid: { color: 'bg-green-500/10 text-green-400 border-green-500/25', label: 'Paid', dot: 'bg-green-400' },
   failed: { color: 'bg-red-500/10 text-red-400 border-red-500/25', label: 'Failed', dot: 'bg-red-400' },
 };
@@ -182,9 +182,9 @@ export default function AffiliatePayouts() {
 
       {/* Pending payout notice */}
       {hasPendingPayout && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-blue-500/8 border border-blue-500/25">
-          <Clock className="w-5 h-5 text-blue-400 shrink-0" />
-          <p className="text-sm text-blue-400">You have a payout request under review. You can request another once it's processed.</p>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-cyan-500/8 border border-cyan-500/25">
+          <Clock className="w-5 h-5 text-cyan-400 shrink-0" />
+          <p className="text-sm text-cyan-400">You have a payout request under review. You can request another once it's processed.</p>
         </div>
       )}
 

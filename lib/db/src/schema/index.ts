@@ -28,3 +28,9 @@ export * from "./brokerTradingAccounts";
 export * from "./brokerAccountTypes";
 export * from "./brokerSettings";
 export * from "./brokerMt5MockAccounts";
+
+// ── Indicator customers (customer portal) ──
+export * from "./customerAccounts";
+export * from "./customerSessions";
+export * from "./customerEmailCodes";
+export * from "./tradingViewAccess";

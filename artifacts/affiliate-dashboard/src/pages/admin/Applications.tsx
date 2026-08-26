@@ -87,8 +87,8 @@ export default function AdminApplications() {
                       <p className="text-primary">{app.communitySize} members</p>
                     </div>
                     <div className="bg-secondary/30 p-3 rounded-lg flex flex-col gap-2 justify-center">
-                      {app.websiteUrl && <a href={app.websiteUrl} target="_blank" className="text-blue-400 hover:underline flex items-center gap-1"><Globe className="w-3 h-3"/> Website</a>}
-                      {app.twitterUrl && <a href={app.twitterUrl} target="_blank" className="text-blue-400 hover:underline flex items-center gap-1"><ExternalLink className="w-3 h-3"/> Twitter</a>}
+                      {app.websiteUrl && <a href={app.websiteUrl} target="_blank" className="text-primary hover:underline flex items-center gap-1"><Globe className="w-3 h-3"/> Website</a>}
+                      {app.twitterUrl && <a href={app.twitterUrl} target="_blank" className="text-primary hover:underline flex items-center gap-1"><ExternalLink className="w-3 h-3"/> Twitter</a>}
                       {app.telegram && <span className="text-muted-foreground flex items-center gap-1"><MessageCircle className="w-3 h-3"/> {app.telegram}</span>}
                     </div>
                   </div>

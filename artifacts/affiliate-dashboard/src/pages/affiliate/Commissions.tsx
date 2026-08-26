@@ -156,7 +156,7 @@ export default function AffiliateCommissions() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium ${typeKey === 'recurring' ? 'bg-blue-500/10 text-blue-400' : 'bg-white/8 text-muted-foreground'}`}>
+                        <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium ${typeKey === 'recurring' ? 'bg-cyan-500/10 text-cyan-400' : 'bg-white/8 text-muted-foreground'}`}>
                           {typeKey === 'recurring' && <ArrowUpRight className="w-3 h-3" />}
                           {typeLabel}
                         </span>

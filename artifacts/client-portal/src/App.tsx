@@ -1,33 +1,35 @@
-import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
+import { Router as WouterRouter, Route, Switch, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ClientAuthProvider, useClientAuth } from "@/lib/clientAuth";
-import { PortalLayout } from "@/components/layout/PortalLayout";
+import { Toaster } from "@/components/ui/toaster";
+import { CustomerAuthProvider, useCustomerAuth } from "@/lib/customerAuth";
+import CustomerLayout from "@/components/layout/CustomerLayout";
+import CustomerAuthPage from "@/pages/public/CustomerAuthPage";
+import CustomerDashboardPage from "@/pages/customer/DashboardPage";
+import IndicatorAccessPage from "@/pages/customer/IndicatorAccessPage";
+import CustomerSupportPage from "@/pages/customer/SupportPage";
+import CustomerAccountPage from "@/pages/customer/AccountPage";
 
-import SignupPage from "@/pages/public/SignupPage";
-import VerifyEmailPage from "@/pages/public/VerifyEmailPage";
-import SetPasswordPage from "@/pages/public/SetPasswordPage";
-import LoginPage from "@/pages/public/LoginPage";
-
-import DashboardPage from "@/pages/portal/DashboardPage";
-import DepositPage from "@/pages/portal/DepositPage";
-import WithdrawPage from "@/pages/portal/WithdrawPage";
-import TransferPage from "@/pages/portal/TransferPage";
-import TradingAccountsPage from "@/pages/portal/TradingAccountsPage";
-import TransactionsPage from "@/pages/portal/TransactionsPage";
-import VerificationPage from "@/pages/portal/VerificationPage";
+// The INDICATOR CUSTOMER portal.
+//
+// This app previously served the broker trading-client platform (deposits,
+// withdrawals, KYC, MT5). Those pages still exist under src/pages/portal/ but
+// are no longer routed — see docs/SESSION-LOG.md. They are left in place rather
+// than deleted here so the switch-over is one reviewable change and the
+// deletion is another.
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
 });
 
-// Everything under PortalLayout requires a logged-in client.
 function Protected({ children }: { children: React.ReactNode }) {
-  const { client, isLoading } = useClientAuth();
+  const { customer, isLoading } = useCustomerAuth();
+  // Render nothing rather than the login page while the stored token is being
+  // revalidated — otherwise every refresh flashes "Sign in" at somebody who is
+  // already signed in.
   if (isLoading) return null;
-  if (!client) return <Redirect to="/login" />;
-  return <PortalLayout>{children}</PortalLayout>;
+  if (!customer) return <Redirect to="/login" />;
+  return <CustomerLayout>{children}</CustomerLayout>;
 }
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -37,22 +39,16 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={base}>
-          <ClientAuthProvider>
+          <CustomerAuthProvider>
             <Switch>
-              <Route path="/signup"><SignupPage /></Route>
-              <Route path="/verify"><VerifyEmailPage /></Route>
-              <Route path="/set-password"><SetPasswordPage /></Route>
-              <Route path="/login"><LoginPage /></Route>
-              <Route path="/"><Protected><DashboardPage /></Protected></Route>
-              <Route path="/deposit"><Protected><DepositPage /></Protected></Route>
-              <Route path="/withdraw"><Protected><WithdrawPage /></Protected></Route>
-              <Route path="/transfer"><Protected><TransferPage /></Protected></Route>
-              <Route path="/accounts"><Protected><TradingAccountsPage /></Protected></Route>
-              <Route path="/history"><Protected><TransactionsPage /></Protected></Route>
-              <Route path="/verification"><Protected><VerificationPage /></Protected></Route>
+              <Route path="/login"><CustomerAuthPage /></Route>
+              <Route path="/"><Protected><CustomerDashboardPage /></Protected></Route>
+              <Route path="/indicator"><Protected><IndicatorAccessPage /></Protected></Route>
+              <Route path="/support"><Protected><CustomerSupportPage /></Protected></Route>
+              <Route path="/account"><Protected><CustomerAccountPage /></Protected></Route>
               <Route><Redirect to="/" /></Route>
             </Switch>
-          </ClientAuthProvider>
+          </CustomerAuthProvider>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

@@ -32,12 +32,12 @@ export default function GoldCursor() {
           width="22"
           height="26"
           viewBox="0 0 22 26"
-          style={{ display: 'block', filter: 'drop-shadow(0 1px 4px rgba(200,140,0,0.5))' }}
+          style={{ display: 'block', filter: 'drop-shadow(0 1px 4px rgba(23,73,214,0.55))' }}
         >
           <polygon
             points="0,0 0,20 5,15 9,24 12,23 8,14 14,14"
-            fill="#FACC15"
-            stroke="#A37C00"
+            fill="#2F8BFF"
+            stroke="#1749D6"
             strokeWidth="1"
             strokeLinejoin="round"
           />
